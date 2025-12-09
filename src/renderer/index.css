@@ -1,0 +1,188 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Urbanist', system-ui, sans-serif;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  body {
+    @apply bg-white text-gray-900;
+    line-height: 1.6;
+    letter-spacing: -0.01em;
+  }
+
+  /* Mejorar legibilidad de textos */
+  p, span, div {
+    line-height: 1.6;
+  }
+
+  /* Títulos con mejor espaciado */
+  h1 {
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    margin-top: 0.25rem;
+  }
+  
+  h2, h3, h4, h5, h6 {
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+
+  /* Textos pequeños más legibles */
+  .text-xs {
+    line-height: 1.5;
+    letter-spacing: 0.01em;
+  }
+
+  .text-sm {
+    line-height: 1.5;
+    letter-spacing: 0.005em;
+  }
+
+  /* Mejor contraste para textos importantes */
+  .text-gray-600 {
+    color: #4b5563;
+  }
+
+  .text-gray-500 {
+    color: #6b7280;
+  }
+
+  .text-gray-400 {
+    color: #9ca3af;
+  }
+
+  /* Ocultar barras de scroll globalmente sin desactivar el desplazamiento */
+  /* Firefox y Edge (antiguo) */
+  * {
+    -ms-overflow-style: none; /* IE y Edge legacy */
+    scrollbar-width: none; /* Firefox */
+  }
+  /* Chrome, Safari, Opera, Edge (Chromium) */
+  *::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  /* Stroke width para iconos de Lucide */
+  svg[stroke] {
+    stroke-width: 1.5px;
+  }
+}
+
+@layer components {
+  /* Smooth slide-in animation utilities */
+  @keyframes slide-in-left {
+    from {
+      transform: translateX(-16px);
+      opacity: 0;
+      filter: saturate(0.9) contrast(0.98);
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+      filter: saturate(1) contrast(1);
+    }
+  }
+
+  .animate-slide-in-left {
+    animation: slide-in-left 420ms cubic-bezier(.22,1,.36,1);
+    will-change: transform, opacity, filter;
+    backface-visibility: hidden;
+  }
+
+  /* Subtle staggered fade-up for list items */
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-fade-in-up {
+    animation: fade-in-up 360ms cubic-bezier(.22,1,.36,1) both;
+  }
+
+  /* Zoom-in animation for modal options */
+  @keyframes zoom-in-sm {
+    from {
+      transform: scale(0.98);
+      opacity: 0;
+      filter: saturate(0.95) contrast(0.98);
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+      filter: saturate(1) contrast(1);
+    }
+  }
+
+  .animate-zoom-in-sm {
+    animation: zoom-in-sm 220ms cubic-bezier(.22,1,.36,1) both;
+    will-change: transform, opacity, filter;
+    backface-visibility: hidden;
+  }
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200;
+  }
+  
+  .btn-primary {
+    @apply bg-primary-600 text-white hover:bg-primary-700;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-800 hover:bg-gray-300;
+  }
+  
+  .btn-success {
+    @apply bg-success-600 text-white hover:bg-success-700;
+  }
+  
+  .btn-danger {
+    @apply bg-danger-600 text-white hover:bg-danger-700;
+  }
+  
+  .card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+  }
+  
+  .input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+  
+  .select {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+
+  /* Mejorar legibilidad de botones */
+  button {
+    letter-spacing: -0.01em;
+  }
+
+  /* Mejorar contraste de labels */
+  label {
+    font-weight: 500;
+    color: #374151;
+    line-height: 1.5;
+  }
+
+  /* Mejorar espaciado en cards */
+  .card p, .card span {
+    line-height: 1.6;
+  }
+} 
