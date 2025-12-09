@@ -408,7 +408,7 @@ const Expenses: React.FC = () => {
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando gastos...</p>
+          <p className="mt-4 text-gray-600">Cargando datos...</p>
         </div>
       </div>
     );
@@ -419,7 +419,7 @@ const Expenses: React.FC = () => {
       {/* Título de la sección */}
       <div className="mb-2">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Gastos</h1>
-        <p className="text-sm text-gray-600">Aquí puedes gestionar tus gastos</p>
+        <p className="text-sm text-gray-600">Registra cada gasto, establece límites mensuales y mantén un control detallado de tus finanzas</p>
       </div>
 
       {/* Header con estadísticas principales */}
@@ -431,8 +431,8 @@ const Expenses: React.FC = () => {
                 <TrendingDown className="w-7 h-7 text-gray-600" />
               </div>
               <div>
-                <p className="text-base font-medium text-gray-600">Gastos totales</p>
-                <p className="text-xs text-gray-500">Todos los tiempos</p>
+                <p className="text-base font-medium text-gray-600">Total acumulado</p>
+                <p className="text-xs text-gray-500">Historial completo</p>
               </div>
             </div>
           </div>
@@ -446,8 +446,8 @@ const Expenses: React.FC = () => {
                 <Calendar className="w-7 h-7 text-gray-600" />
               </div>
               <div>
-                <p className="text-base font-medium text-gray-600">Este mes</p>
-                <p className="text-xs text-gray-500">Gastos actuales</p>
+                <p className="text-base font-medium text-gray-600">Mes actual</p>
+                <p className="text-xs text-gray-500">Gastos del período</p>
               </div>
             </div>
           </div>
@@ -462,7 +462,7 @@ const Expenses: React.FC = () => {
               </div>
               <div>
                 <p className="text-base font-medium text-gray-600">Promedio</p>
-                <p className="text-xs text-gray-500">Por transacción</p>
+                <p className="text-xs text-gray-500">Por gasto</p>
               </div>
             </div>
           </div>
@@ -515,7 +515,7 @@ const Expenses: React.FC = () => {
                   <div className="flex-1">
                     <input
                       type="text"
-                      placeholder="Gasto rápido"
+                      placeholder="Monto del gasto rápido"
                       value={quickExpenseAmount}
                       onChange={(e) => setQuickExpenseAmount(formatNumberInput(e.target.value))}
                       className="w-full text-xs bg-white border-none outline-none placeholder-gray-500"
@@ -551,7 +551,7 @@ const Expenses: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-2xl font-bold text-gray-900">{formatCurrency(monthlyGoal.currentAmount)}</p>
-                    <p className="text-xs text-gray-500">Gastos actuales</p>
+                    <p className="text-xs text-gray-500">Acumulado del mes</p>
                   </div>
                   <div className="text-right">
                     <p className="text-lg font-semibold text-gray-700">{formatCurrency(monthlyGoal.targetAmount)}</p>
@@ -613,7 +613,7 @@ const Expenses: React.FC = () => {
                 onChange={(e) => setFilterCategory(e.target.value)}
                 className="px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
               >
-                <option value="all">Todas las categorías</option>
+                <option value="all">Ver todas</option>
                 {categories.map(category => (
                   <option key={category.id} value={category.name}>
                     {category.name}
@@ -688,7 +688,8 @@ const Expenses: React.FC = () => {
             ) : (
               <div className="text-center py-8">
                 <TrendingDown className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500">No hay gastos registrados</p>
+                <p className="text-gray-500 mb-2">Comienza registrando tu primer gasto</p>
+                <p className="text-xs text-gray-400">Usa el botón "Nuevo gasto" o el gasto rápido para empezar</p>
               </div>
             )}
           </div>
@@ -746,6 +747,7 @@ const Expenses: React.FC = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Meta de gastos mensual
+                  <span className="text-xs text-gray-500 ml-1">(límite máximo)</span>
                 </label>
                 <input
                   type="text"
@@ -753,7 +755,7 @@ const Expenses: React.FC = () => {
                     value={goalFormData.targetAmount}
                     onChange={(e) => setGoalFormData({...goalFormData, targetAmount: formatNumberInput(e.target.value)})}
                     className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                  placeholder="0.00"
+                  placeholder="0.00 (solo números)"
                 />
               </div>
 
@@ -802,6 +804,7 @@ const Expenses: React.FC = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Descripción
+                  <span className="text-xs text-gray-500 ml-1">(en qué gastaste)</span>
                 </label>
                 <input
                   type="text"
@@ -809,13 +812,14 @@ const Expenses: React.FC = () => {
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                  placeholder="Descripción del gasto"
+                  placeholder="Ej: Compra en supermercado, cena en restaurante, viaje en taxi..."
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Monto
+                  <span className="text-xs text-gray-500 ml-1">(cantidad gastada)</span>
                 </label>
                 <input
                   type="text"
@@ -823,7 +827,7 @@ const Expenses: React.FC = () => {
                   value={formData.amount}
                   onChange={(e) => setFormData({...formData, amount: formatNumberInput(e.target.value)})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                  placeholder="0.00"
+                  placeholder="0.00 (solo números)"
                 />
               </div>
 
@@ -868,7 +872,7 @@ const Expenses: React.FC = () => {
                   onChange={(e) => setFormData({...formData, notes: e.target.value})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                   rows={3}
-                  placeholder="Notas adicionales..."
+                  placeholder="Información adicional (opcional)"
                 />
               </div>
 
@@ -1001,7 +1005,7 @@ const Expenses: React.FC = () => {
             </div>
 
             <p className="text-gray-700 mb-6">
-              ¿Estás seguro de que quieres eliminar este gasto? Esta acción no se puede deshacer.
+              Esta acción eliminará permanentemente el gasto. ¿Deseas continuar?
             </p>
 
             <div className="flex space-x-3">

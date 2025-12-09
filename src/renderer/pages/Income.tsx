@@ -111,7 +111,7 @@ const Income: React.FC = () => {
       ]);
       
       const incomeTransactions = transactionsData.filter(t => t.type === 'income');
-      const incomeCategories = categoriesData.filter(c => c.type === 'income');
+      const incomeCategories = categoriesData.filter(c => (c.type || '').toLowerCase() === 'income');
       
       const uniqueIncomeCategories = removeDuplicateCategories(incomeCategories);
       
@@ -354,7 +354,7 @@ const Income: React.FC = () => {
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando ingresos...</p>
+          <p className="mt-4 text-gray-600">Cargando datos...</p>
         </div>
       </div>
     );
@@ -365,7 +365,7 @@ const Income: React.FC = () => {
       {/* Título de la sección */}
       <div className="mb-2">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Ingresos</h1>
-        <p className="text-sm text-gray-600">Aquí puedes gestionar tus ingresos</p>
+        <p className="text-sm text-gray-600">Agrega tus ingresos, establece metas mensuales y lleva un registro completo de todo el dinero que recibes</p>
       </div>
 
       {/* Header con estadísticas principales */}
@@ -377,8 +377,8 @@ const Income: React.FC = () => {
                 <TrendingUp className="w-7 h-7 text-gray-600" />
               </div>
               <div>
-                <p className="text-base font-medium text-gray-600">Ingresos totales</p>
-                <p className="text-xs text-gray-500">Todos los tiempos</p>
+                <p className="text-base font-medium text-gray-600">Total acumulado</p>
+                <p className="text-xs text-gray-500">Historial completo</p>
               </div>
             </div>
           </div>
@@ -392,8 +392,8 @@ const Income: React.FC = () => {
                 <Calendar className="w-7 h-7 text-gray-600" />
               </div>
               <div>
-                <p className="text-base font-medium text-gray-600">Este mes</p>
-                <p className="text-xs text-gray-500">Ingresos actuales</p>
+                <p className="text-base font-medium text-gray-600">Mes actual</p>
+                <p className="text-xs text-gray-500">Ingresos del período</p>
               </div>
             </div>
           </div>
@@ -408,7 +408,7 @@ const Income: React.FC = () => {
               </div>
               <div>
                 <p className="text-base font-medium text-gray-600">Promedio</p>
-                <p className="text-xs text-gray-500">Por transacción</p>
+                <p className="text-xs text-gray-500">Por ingreso</p>
               </div>
             </div>
           </div>
@@ -461,7 +461,7 @@ const Income: React.FC = () => {
                   <div className="flex-1">
                     <input
                       type="text"
-                      placeholder="Ingreso rápido"
+                      placeholder="Monto del ingreso rápido"
                       value={quickIncomeAmount}
                       onChange={(e) => setQuickIncomeAmount(formatNumberInput(e.target.value))}
                       className="w-full text-xs bg-white border-none outline-none placeholder-gray-500"
@@ -497,7 +497,7 @@ const Income: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-2xl font-bold text-gray-900">{formatCurrency(monthlyGoal.currentAmount)}</p>
-                    <p className="text-xs text-gray-500">Ingresos actuales</p>
+                    <p className="text-xs text-gray-500">Acumulado del mes</p>
                   </div>
                   <div className="text-right">
                     <p className="text-lg font-semibold text-gray-700">{formatCurrency(monthlyGoal.targetAmount)}</p>
@@ -528,7 +528,8 @@ const Income: React.FC = () => {
             ) : (
               <div className="text-center py-8">
                 <BookHeart className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500 text-sm">No hay meta mensual establecida</p>
+                <p className="text-gray-500 text-sm mb-1">Define tu objetivo mensual</p>
+                <p className="text-xs text-gray-400">Establece una meta para mantener un control mejor de tus ingresos</p>
                 <button 
                   onClick={handleMonthlyGoal}
                   className="mt-3 px-4 py-2 bg-gray-900 text-white text-xs rounded-xl hover:bg-gray-800 transition-colors"
@@ -559,7 +560,7 @@ const Income: React.FC = () => {
                 onChange={(e) => setFilterCategory(e.target.value)}
                 className="px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
               >
-                <option value="all">Todas las categorías</option>
+                <option value="all">Ver todas</option>
                 {categories.map(category => (
                   <option key={category.id} value={category.name}>
                     {category.name}
@@ -626,7 +627,8 @@ const Income: React.FC = () => {
             ) : (
               <div className="text-center py-8">
                 <TrendingUp className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500">No hay ingresos registrados</p>
+                <p className="text-gray-500 mb-2">Comienza registrando tu primer ingreso</p>
+                <p className="text-xs text-gray-400">Usa el botón "Nuevo ingreso" o el ingreso rápido para empezar</p>
               </div>
             )}
           </div>
@@ -673,6 +675,7 @@ const Income: React.FC = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Meta de ingresos mensual
+                  <span className="text-xs text-gray-500 ml-1">(objetivo a alcanzar)</span>
                 </label>
                 <input
                   type="text"
@@ -680,7 +683,7 @@ const Income: React.FC = () => {
                     value={goalFormData.targetAmount}
                     onChange={(e) => setGoalFormData({...goalFormData, targetAmount: formatNumberInput(e.target.value)})}
                     className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                  placeholder="0.00"
+                  placeholder="0.00 (solo números)"
                 />
               </div>
 
@@ -729,6 +732,7 @@ const Income: React.FC = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Descripción
+                  <span className="text-xs text-gray-500 ml-1">(origen del ingreso)</span>
                 </label>
                 <input
                   type="text"
@@ -736,13 +740,14 @@ const Income: React.FC = () => {
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                  placeholder="Descripción del ingreso"
+                  placeholder="Ej: Salario mensual, trabajo freelance, venta de producto..."
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Monto
+                  <span className="text-xs text-gray-500 ml-1">(cantidad recibida)</span>
                 </label>
                 <input
                   type="text"
@@ -750,7 +755,7 @@ const Income: React.FC = () => {
                   value={formData.amount}
                   onChange={(e) => setFormData({...formData, amount: formatNumberInput(e.target.value)})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                  placeholder="0.00"
+                  placeholder="0.00 (solo números)"
                 />
               </div>
 
@@ -795,7 +800,7 @@ const Income: React.FC = () => {
                   onChange={(e) => setFormData({...formData, notes: e.target.value})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                   rows={3}
-                  placeholder="Notas adicionales..."
+                  placeholder="Información adicional (opcional)"
                 />
               </div>
 
@@ -856,7 +861,7 @@ const Income: React.FC = () => {
             </div>
 
             <p className="text-gray-700 mb-6">
-              ¿Estás seguro de que quieres eliminar este ingreso? Esta acción no se puede deshacer.
+              Esta acción eliminará permanentemente el ingreso. ¿Deseas continuar?
             </p>
 
             <div className="flex space-x-3">

@@ -123,7 +123,7 @@ const Categories: React.FC = () => {
           </h3>
           <div className="space-y-3">
             {categories
-              .filter(cat => cat.type === 'income')
+              .filter(cat => (cat.type || '').toLowerCase() === 'income')
               .map(category => (
                 <div key={category.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center space-x-3">
@@ -152,7 +152,7 @@ const Categories: React.FC = () => {
           </h3>
           <div className="space-y-3">
             {categories
-              .filter(cat => cat.type === 'expense')
+              .filter(cat => (cat.type || '').toLowerCase() === 'expense')
               .map(category => (
                 <div key={category.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center space-x-3">

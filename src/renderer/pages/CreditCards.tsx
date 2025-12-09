@@ -396,7 +396,7 @@ const CreditCards: React.FC = () => {
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando tarjetas de crédito...</p>
+          <p className="mt-4 text-gray-600">Cargando datos...</p>
         </div>
       </div>
     );
@@ -407,7 +407,7 @@ const CreditCards: React.FC = () => {
       {/* Título de la sección */}
       <div className="mb-2">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Tarjetas</h1>
-        <p className="text-sm text-gray-600">Aquí puedes gestionar tus tarjetas</p>
+        <p className="text-sm text-gray-600">Gestiona tus tarjetas, registra gastos en cuotas y mantén un seguimiento de tus deudas pendientes</p>
       </div>
 
       {/* Header con estadísticas principales */}
@@ -419,8 +419,8 @@ const CreditCards: React.FC = () => {
                 <CreditCard className="w-7 h-7 text-gray-600" />
               </div>
               <div>
-                <p className="text-base font-medium text-gray-600">Deuda total</p>
-                <p className="text-xs text-gray-500">Todas las tarjetas</p>
+                <p className="text-base font-medium text-gray-600">Deuda acumulada</p>
+                <p className="text-xs text-gray-500">Total pendiente</p>
               </div>
             </div>
           </div>
@@ -434,8 +434,8 @@ const CreditCards: React.FC = () => {
                 <DollarSign className="w-7 h-7 text-gray-600" />
               </div>
               <div>
-                <p className="text-base font-medium text-gray-600">A pagar este mes</p>
-                <p className="text-xs text-gray-500">Gasto del mes</p>
+                <p className="text-base font-medium text-gray-600">Vencimiento mensual</p>
+                <p className="text-xs text-gray-500">Pago del período</p>
               </div>
             </div>
           </div>
@@ -451,8 +451,8 @@ const CreditCards: React.FC = () => {
                 <Clock className="w-7 h-7 text-gray-600" />
               </div>
               <div>
-                <p className="text-base font-medium text-gray-600">Cuotas pendientes</p>
-                <p className="text-xs text-gray-500">Total a pagar</p>
+                <p className="text-base font-medium text-gray-600">Cuotas restantes</p>
+                <p className="text-xs text-gray-500">Pendiente de pago</p>
               </div>
             </div>
           </div>
@@ -645,8 +645,8 @@ const CreditCards: React.FC = () => {
           {filteredTransactions.filter(t => t.creditCardId && (!t.isFixedExpense) && (t.totalInstallments === 1 || !t.totalInstallments) && t.category !== 'Saldo Inicial').length === 0 && (
             <div className="text-center py-8">
               <DollarSign className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">No hay gastos simples</p>
-              <p className="text-xs text-gray-400 mt-1">Los gastos de una sola cuota aparecerán aquí</p>
+              <p className="text-gray-500 mb-2">No hay gastos registrados</p>
+              <p className="text-xs text-gray-400">Los gastos de una sola cuota aparecerán aquí. Usa "Nuevo gasto" para agregar uno</p>
             </div>
           )}
         </div>
@@ -725,8 +725,8 @@ const CreditCards: React.FC = () => {
           {filteredTransactions.filter(t => t.creditCardId && t.isFixedExpense && t.category !== 'Saldo Inicial').length === 0 && (
             <div className="text-center py-8">
               <DollarSign className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">No hay gastos fijos</p>
-              <p className="text-xs text-gray-400 mt-1">Los gastos fijos aparecerán aquí</p>
+              <p className="text-gray-500 mb-2">No hay gastos fijos registrados</p>
+              <p className="text-xs text-gray-400">Los gastos recurrentes (suscripciones, servicios) aparecerán aquí</p>
             </div>
           )}
         </div>
@@ -756,7 +756,7 @@ const CreditCards: React.FC = () => {
                 onChange={(e) => setSelectedCard(e.target.value)}
                 className="px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
               >
-                <option value="all">Todas las tarjetas</option>
+                <option value="all">Ver todas</option>
                 {creditCards.map(card => (
                   <option key={card.id} value={card.id}>
                     {card.name}
@@ -908,8 +908,8 @@ const CreditCards: React.FC = () => {
           {filteredTransactions.filter(t => t.creditCardId && (!t.isFixedExpense) && t.totalInstallments && t.totalInstallments > 1).length === 0 && (
             <div className="text-center py-8">
               <CreditCard className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">No hay gastos en cuotas</p>
-              <p className="text-xs text-gray-400 mt-1">Los gastos con tarjeta de crédito aparecerán aquí</p>
+              <p className="text-gray-500 mb-2">No hay gastos en cuotas</p>
+              <p className="text-xs text-gray-400">Los gastos a plazos (compras grandes) aparecerán aquí. Puedes pagar cuotas individualmente</p>
             </div>
           )}
         </div>
@@ -963,6 +963,7 @@ const CreditCards: React.FC = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Límite de crédito
+                  <span className="text-xs text-gray-500 ml-1">(monto máximo disponible)</span>
                 </label>
                 <input
                   type="text"
@@ -970,7 +971,7 @@ const CreditCards: React.FC = () => {
                   value={cardFormData.creditLimit}
                   onChange={(e) => setCardFormData({...cardFormData, creditLimit: formatNumberInput(e.target.value)})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                  placeholder="0.00"
+                  placeholder="0.00 (solo números)"
                 />
               </div>
 
@@ -1023,7 +1024,7 @@ const CreditCards: React.FC = () => {
             </div>
 
             <p className="text-gray-700 mb-6">
-              ¿Estás seguro de que quieres eliminar esta tarjeta? Esta acción no se puede deshacer.
+              Esta acción eliminará permanentemente la tarjeta y sus datos. ¿Deseas continuar?
             </p>
 
             <div className="flex space-x-3">
@@ -1081,7 +1082,7 @@ const CreditCards: React.FC = () => {
             </div>
 
             <p className="text-gray-700 mb-6">
-              ¿Estás seguro de que quieres eliminar este gasto? Esta acción no se puede deshacer.
+              Esta acción eliminará permanentemente el gasto. ¿Deseas continuar?
             </p>
 
             <div className="flex space-x-3">
@@ -1124,6 +1125,7 @@ const CreditCards: React.FC = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Descripción
+                  <span className="text-xs text-gray-500 ml-1">(qué compraste o pagaste)</span>
                 </label>
                 <input
                   type="text"
@@ -1131,13 +1133,14 @@ const CreditCards: React.FC = () => {
                   value={transactionFormData.description}
                   onChange={(e) => setTransactionFormData({...transactionFormData, description: e.target.value})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                  placeholder="Ej: iPhone, Laptop, etc."
+                  placeholder="Ej: Compra de electrodoméstico, pago de suscripción mensual..."
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Monto
+                  <span className="text-xs text-gray-500 ml-1">(total del gasto)</span>
                 </label>
                 <input
                   type="text"
@@ -1145,7 +1148,7 @@ const CreditCards: React.FC = () => {
                   value={transactionFormData.amount}
                   onChange={(e) => setTransactionFormData({...transactionFormData, amount: formatNumberInput(e.target.value)})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                  placeholder="0.00"
+                  placeholder="0.00 (solo números)"
                 />
               </div>
 
@@ -1192,6 +1195,7 @@ const CreditCards: React.FC = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Total de cuotas
+                  <span className="text-xs text-gray-500 ml-1">(número de pagos mensuales)</span>
                 </label>
                 <input
                   type="number"
@@ -1222,7 +1226,7 @@ const CreditCards: React.FC = () => {
                   onChange={(e) => setTransactionFormData({...transactionFormData, notes: e.target.value})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                   rows={3}
-                  placeholder="Notas adicionales..."
+                  placeholder="Información adicional (opcional)"
                 />
               </div>
 

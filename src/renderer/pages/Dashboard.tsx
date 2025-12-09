@@ -116,7 +116,7 @@ const Dashboard: React.FC = () => {
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando datos...</p>
+          <p className="mt-4 text-gray-600">Cargando información...</p>
         </div>
       </div>
     );
@@ -127,7 +127,7 @@ const Dashboard: React.FC = () => {
       {/* Título de bienvenida */}
       <div className="mb-2">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Bienvenido a FinBook</h1>
-        <p className="text-sm text-gray-600">Tu dashboard de finanzas personales</p>
+        <p className="text-sm text-gray-600">Vista general de tus ingresos, gastos y balance del mes actual</p>
       </div>
 
       {/* Primera fila: Métricas principales simplificadas */}
@@ -139,8 +139,8 @@ const Dashboard: React.FC = () => {
                 <TrendingUp className="w-7 h-7 text-gray-600" />
               </div>
               <div>
-                <p className="text-base font-medium text-gray-600">Tus ingresos</p>
-                <p className="text-xs text-gray-500">De este mes</p>
+                <p className="text-base font-medium text-gray-600">Ingresos</p>
+                <p className="text-xs text-gray-500">Mes actual</p>
               </div>
             </div>
           </div>
@@ -154,8 +154,8 @@ const Dashboard: React.FC = () => {
                 <TrendingDown className="w-7 h-7 text-gray-600" />
               </div>
               <div>
-                <p className="text-base font-medium text-gray-600">Tus gastos</p>
-                <p className="text-xs text-gray-500">De este mes</p>
+                <p className="text-base font-medium text-gray-600">Gastos</p>
+                <p className="text-xs text-gray-500">Mes actual</p>
               </div>
             </div>
           </div>
@@ -169,8 +169,8 @@ const Dashboard: React.FC = () => {
                 <Wallet className="w-7 h-7 text-gray-600" />
               </div>
               <div>
-                <p className="text-base font-medium text-gray-600">Tu Balance</p>
-                <p className="text-xs text-gray-500">De este mes</p>
+                <p className="text-base font-medium text-gray-600">Balance</p>
+                <p className="text-xs text-gray-500">Mes actual</p>
               </div>
             </div>
           </div>
@@ -189,7 +189,8 @@ const Dashboard: React.FC = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">Ajustes método 50-30-20</h2>
+              <h2 className="text-xl font-bold text-gray-900">Configurar presupuesto mensual</h2>
+            <p className="text-sm text-gray-500 mt-1">Elige un método de distribución o personaliza los porcentajes</p>
               <button
                 onClick={() => setShowPresets(false)}
                 className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
@@ -253,7 +254,8 @@ const Dashboard: React.FC = () => {
                 <TrendingUp className="w-4 h-4 text-gray-600" />
               </div>
               <div className="text-left">
-                <p className="text-xs font-medium text-gray-900">Nuevo ingreso</p>
+                <p className="text-xs font-medium text-gray-900">Registrar ingreso</p>
+                <p className="text-xs text-gray-500">Agregar dinero recibido</p>
               </div>
             </button>
             <button onClick={() => handleQuickAction('expense')} className="w-full flex items-center space-x-2 p-3 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md border border-gray-200">
@@ -261,7 +263,8 @@ const Dashboard: React.FC = () => {
                 <TrendingDown className="w-4 h-4 text-gray-600" />
               </div>
               <div className="text-left">
-                <p className="text-xs font-medium text-gray-900">Nuevo gasto</p>
+                <p className="text-xs font-medium text-gray-900">Registrar gasto</p>
+                <p className="text-xs text-gray-500">Agregar dinero gastado</p>
               </div>
             </button>
             <button onClick={() => handleQuickAction('savings')} className="w-full flex items-center space-x-2 p-3 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md border border-gray-200">
@@ -269,7 +272,8 @@ const Dashboard: React.FC = () => {
                 <PiggyBank className="w-4 h-4 text-gray-600" />
               </div>
               <div className="text-left">
-                <p className="text-xs font-medium text-gray-900">Nuevo ahorro</p>
+                <p className="text-xs font-medium text-gray-900">Gestionar ahorros</p>
+                <p className="text-xs text-gray-500">Ver metas y cuentas</p>
               </div>
             </button>
           </div>
@@ -301,9 +305,9 @@ const Dashboard: React.FC = () => {
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 mb-1">Necesidades</h4>
-                <p className="text-sm text-gray-600 mb-2 leading-relaxed">Vivienda, comida, transporte</p>
-                <p className="text-xs text-gray-600">
-                  {formatCurrency((summary?.totalIncome || 0) * (allocation.needs / 100))} disponible
+                <p className="text-sm text-gray-600 mb-2 leading-relaxed">Alquiler, comida, servicios básicos y transporte</p>
+                <p className="text-xs text-gray-500">
+                  Presupuesto: {formatCurrency((summary?.totalIncome || 0) * (allocation.needs / 100))}
                 </p>
               </div>
             </div>
@@ -320,9 +324,9 @@ const Dashboard: React.FC = () => {
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 mb-1">Deseos</h4>
-                <p className="text-sm text-gray-600 mb-2 leading-relaxed">Entretenimiento, lujos</p>
-                <p className="text-xs text-gray-600">
-                  {formatCurrency((summary?.totalIncome || 0) * (allocation.wants / 100))} disponible
+                <p className="text-sm text-gray-600 mb-2 leading-relaxed">Entretenimiento, restaurantes, compras y hobbies</p>
+                <p className="text-xs text-gray-500">
+                  Presupuesto: {formatCurrency((summary?.totalIncome || 0) * (allocation.wants / 100))}
                 </p>
               </div>
             </div>
@@ -339,9 +343,9 @@ const Dashboard: React.FC = () => {
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 mb-1">Ahorros</h4>
-                <p className="text-sm text-gray-600 mb-2 leading-relaxed">Inversiones, emergencias</p>
-                <p className="text-xs text-gray-600">
-                  {formatCurrency((summary?.totalIncome || 0) * (allocation.savings / 100))} disponible
+                <p className="text-sm text-gray-600 mb-2 leading-relaxed">Fondo de emergencia, inversiones y metas a largo plazo</p>
+                <p className="text-xs text-gray-500">
+                  Presupuesto: {formatCurrency((summary?.totalIncome || 0) * (allocation.savings / 100))}
                 </p>
               </div>
             </div>
@@ -386,7 +390,8 @@ const Dashboard: React.FC = () => {
           ) : (
             <div className="text-center py-8">
               <CreditCard className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">No hay transacciones recientes</p>
+              <p className="text-gray-500 mb-2">Aún no tienes transacciones registradas</p>
+              <p className="text-xs text-gray-400">Usa las acciones rápidas para agregar tu primer ingreso o gasto</p>
             </div>
           )}
         </div>

@@ -322,7 +322,7 @@ const Savings: React.FC = () => {
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando ahorros...</p>
+          <p className="mt-4 text-gray-600">Cargando datos...</p>
         </div>
       </div>
     );
@@ -333,7 +333,7 @@ const Savings: React.FC = () => {
       {/* Título de la sección */}
       <div className="mb-2">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Ahorros</h1>
-        <p className="text-sm text-gray-600">Aquí puedes gestionar tus ahorros</p>
+        <p className="text-sm text-gray-600">Crea metas de ahorro, registra tus cuentas y haz seguimiento del progreso hacia tus objetivos financieros</p>
       </div>
 
       {/* Header con estadísticas principales */}
@@ -345,8 +345,8 @@ const Savings: React.FC = () => {
                 <PiggyBank className="w-7 h-7 text-gray-600" />
               </div>
               <div>
-                <p className="text-base font-medium text-gray-600">Total ahorrado</p>
-                <p className="text-xs text-gray-500">Todas las cuentas</p>
+                <p className="text-base font-medium text-gray-600">Ahorros totales</p>
+                <p className="text-xs text-gray-500">En todas las cuentas</p>
               </div>
             </div>
           </div>
@@ -360,8 +360,8 @@ const Savings: React.FC = () => {
                 <BookHeart className="w-7 h-7 text-gray-600" />
               </div>
               <div>
-                <p className="text-base font-medium text-gray-600">Metas de ahorro</p>
-                <p className="text-xs text-gray-500">Total actual</p>
+                <p className="text-base font-medium text-gray-600">Progreso de metas</p>
+                <p className="text-xs text-gray-500">Acumulado actual</p>
               </div>
             </div>
           </div>
@@ -375,8 +375,8 @@ const Savings: React.FC = () => {
                 <BarChart3 className="w-7 h-7 text-gray-600" />
               </div>
               <div>
-                <p className="text-base font-medium text-gray-600">Progreso</p>
-                <p className="text-xs text-gray-500">General</p>
+                <p className="text-base font-medium text-gray-600">Progreso general</p>
+                <p className="text-xs text-gray-500">Porcentaje completado</p>
               </div>
             </div>
           </div>
@@ -397,7 +397,7 @@ const Savings: React.FC = () => {
             </div>
             <div className="text-left">
               <p className="text-xs font-medium text-gray-900">Nueva meta</p>
-              <p className="text-xs text-gray-500">Crear objetivo</p>
+              <p className="text-xs text-gray-500">Establecer meta</p>
             </div>
           </button>
           
@@ -410,7 +410,7 @@ const Savings: React.FC = () => {
             </div>
             <div className="text-left">
               <p className="text-xs font-medium text-gray-900">Nueva cuenta</p>
-              <p className="text-xs text-gray-500">Agregar cuenta</p>
+              <p className="text-xs text-gray-500">Registrar cuenta</p>
             </div>
           </button>
         </div>
@@ -613,6 +613,7 @@ const Savings: React.FC = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Nombre de la meta
+                  <span className="text-xs text-gray-500 ml-1">(objetivo de ahorro)</span>
                 </label>
                 <input
                   type="text"
@@ -620,35 +621,37 @@ const Savings: React.FC = () => {
                   value={goalFormData.name}
                   onChange={(e) => setGoalFormData({...goalFormData, name: e.target.value})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                  placeholder="Vacaciones de Verano"
+                  placeholder="Ej: Vacaciones de verano, fondo de emergencia, compra de auto..."
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Monto objetivo
-                  </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Monto objetivo
+                  <span className="text-xs text-gray-500 ml-1">(cuánto quieres ahorrar)</span>
+                </label>
                   <input
                     type="text"
                     required
                     value={goalFormData.targetAmount}
                     onChange={(e) => setGoalFormData({...goalFormData, targetAmount: formatNumberInput(e.target.value)})}
                     className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                    placeholder="0.00"
+                    placeholder="0.00 (solo números)"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Monto actual
-                  </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Monto actual
+                  <span className="text-xs text-gray-500 ml-1">(cuánto has ahorrado hasta ahora)</span>
+                </label>
                   <input
                     type="text"
                     required
                     value={goalFormData.currentAmount}
                     onChange={(e) => setGoalFormData({...goalFormData, currentAmount: formatNumberInput(e.target.value)})}
                     className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                    placeholder="0.00"
+                    placeholder="0.00 (solo números)"
                   />
                 </div>
               </div>
@@ -696,7 +699,7 @@ const Savings: React.FC = () => {
                   onChange={(e) => setGoalFormData({...goalFormData, notes: e.target.value})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                   rows={3}
-                  placeholder="Descripción adicional..."
+                  placeholder="Información adicional (opcional)"
                 />
               </div>
 
@@ -740,6 +743,7 @@ const Savings: React.FC = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Nombre de la cuenta
+                  <span className="text-xs text-gray-500 ml-1">(identificador de la cuenta)</span>
                 </label>
                 <input
                   type="text"
@@ -747,28 +751,30 @@ const Savings: React.FC = () => {
                   value={accountFormData.name}
                   onChange={(e) => setAccountFormData({...accountFormData, name: e.target.value})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                  placeholder="Cuenta de Ahorros Principal"
+                  placeholder="Ej: Cuenta principal, fondo de emergencia..."
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Saldo actual
-                  </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Saldo actual
+                  <span className="text-xs text-gray-500 ml-1">(dinero disponible en la cuenta)</span>
+                </label>
                   <input
                     type="text"
                     required
                     value={accountFormData.balance}
                     onChange={(e) => setAccountFormData({...accountFormData, balance: formatNumberInput(e.target.value)})}
                     className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                    placeholder="0.00"
+                    placeholder="0.00 (solo números)"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Tasa de interés (%)
-                  </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tasa de interés (%)
+                  <span className="text-xs text-gray-500 ml-1">(rendimiento anual estimado)</span>
+                </label>
                   <input
                     type="text"
                     required
@@ -847,6 +853,7 @@ const Savings: React.FC = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Monto
+                  <span className="text-xs text-gray-500 ml-1">(cantidad a depositar o retirar)</span>
                 </label>
                 <input
                   type="text"
@@ -854,7 +861,7 @@ const Savings: React.FC = () => {
                   value={adjustAmount}
                   onChange={(e) => setAdjustAmount(formatNumberInput(e.target.value))}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                  placeholder="0.00"
+                  placeholder="0.00 (solo números)"
                 />
               </div>
 
