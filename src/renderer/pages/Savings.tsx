@@ -312,6 +312,16 @@ const Savings: React.FC = () => {
     });
   };
 
+  // Función para traducir tipos de cuenta
+  const getAccountTypeLabel = (type: 'checking' | 'savings' | 'investment'): string => {
+    const typeMap: Record<'checking' | 'savings' | 'investment', string> = {
+      'checking': 'Corriente',
+      'savings': 'Ahorros',
+      'investment': 'Inversión'
+    };
+    return typeMap[type] || type;
+  };
+
   const totalSavings = savingsAccounts.reduce((sum, account) => sum + account.balance, 0);
   const totalGoals = savingsGoals.reduce((sum, goal) => sum + goal.currentAmount, 0);
   const totalBookHearts = savingsGoals.reduce((sum, goal) => sum + goal.targetAmount, 0);
@@ -538,7 +548,7 @@ const Savings: React.FC = () => {
                   </div>
                   <div>
                     <h4 className="font-bold text-gray-900 text-sm">{account.name}</h4>
-                    <p className="text-xs text-gray-500 capitalize">{account.type}</p>
+                    <p className="text-xs text-gray-500">{getAccountTypeLabel(account.type)}</p>
                   </div>
                 </div>
                 <div className="flex space-x-1">
