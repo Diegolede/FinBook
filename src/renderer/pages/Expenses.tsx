@@ -476,7 +476,7 @@ const Expenses: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           {/* Acciones Rápidas */}
           <div className="bg-white rounded-3xl px-5 pt-8 pb-5 shadow-sm border border-gray-200 transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg flex flex-col">
-            <h3 className="text-sm font-semibold text-gray-900 mb-6">Acciones rápidas</h3>
+            <h3 className="text-base font-semibold text-gray-900 mb-6">Acciones rápidas</h3>
             <div className="space-y-2">
               <button 
                 onClick={() => setShowForm(true)}

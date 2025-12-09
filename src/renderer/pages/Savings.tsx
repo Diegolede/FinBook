@@ -386,7 +386,7 @@ const Savings: React.FC = () => {
 
       {/* Acciones Rápidas */}
       <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-200 transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg">
-        <h3 className="text-sm font-semibold text-gray-900 mb-3">Acciones rápidas</h3>
+        <h3 className="text-base font-semibold text-gray-900 mb-3">Acciones rápidas</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <button
             onClick={() => setShowGoalForm(true)}
