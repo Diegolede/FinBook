@@ -8,7 +8,9 @@ import {
   DollarSign,
   X,
   CheckCircle,
-  Clock
+  Clock,
+  ArrowLeft,
+  Check
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -845,37 +847,42 @@ const CreditCards: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Botón de Pagar Cuota */}
-                    <div className="flex items-center justify-between">
-                      <div className="text-xs text-gray-500">
+                    {/* Fecha */}
+                    <div className="mb-4">
+                      <p className="text-xs text-gray-500">
                         {format(new Date(transaction.date), 'dd/MM/yyyy', { locale: es })}
-                      </div>
-                      
-                      <div className="flex items-center space-x-2">
-                        {paidInstallments > 0 && (
-                          <button
-                            onClick={() => handleUpdateInstallment(transaction.id, paidInstallments - 1)}
-                            className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
-                            title="Deshacer pago de cuota"
-                          >
-                            ↶
-                          </button>
-                        )}
-                        
-                        {remainingInstallments > 0 ? (
+                      </p>
+                    </div>
+
+                    {/* Botones de Acción */}
+                    <div className="flex items-center space-x-2">
+                      {remainingInstallments > 0 ? (
+                        <>
                           <button
                             onClick={() => handleUpdateInstallment(transaction.id, paidInstallments + 1)}
-                            className="px-3 py-1 text-xs bg-[#0f0f0f] text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
+                            className="flex-1 flex items-center justify-center space-x-1.5 px-3 py-2 bg-[#0f0f0f] text-white rounded-xl hover:bg-gray-800 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md font-medium text-sm"
                           >
-                            Pagar cuota
+                            <Check className="w-4 h-4" />
+                            <span>Pagar cuota</span>
                           </button>
-                        ) : (
-                          <div className="flex items-center space-x-1">
-                            <CheckCircle className="w-4 h-4 text-gray-600" />
-                            <span className="text-xs font-medium text-gray-700">Completado</span>
-                          </div>
-                        )}
-                      </div>
+                          
+                          {paidInstallments > 0 && (
+                            <button
+                              onClick={() => handleUpdateInstallment(transaction.id, paidInstallments - 1)}
+                              className="flex-1 flex items-center justify-center space-x-1.5 px-3 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md font-medium border border-gray-200 text-sm"
+                              title="Deshacer pago de cuota"
+                            >
+                              <ArrowLeft className="w-4 h-4" />
+                              <span>Retroceder cuota</span>
+                            </button>
+                          )}
+                        </>
+                      ) : (
+                        <div className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gray-50 rounded-2xl border border-gray-200">
+                          <CheckCircle className="w-5 h-5 text-gray-600" />
+                          <span className="text-sm font-medium text-gray-700">Completado</span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Estado de Cuotas Pendientes */}
