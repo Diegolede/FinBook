@@ -180,9 +180,10 @@ const Dashboard: React.FC = () => {
 
       {showPresets && (
         <div
-          className="fixed inset-0 bg-[#0f0f0f] bg-opacity-50 flex items-center justify-center z-50"
+          className="fixed -top-1 -left-1 -right-1 -bottom-1 w-[calc(100%+2px)] h-[calc(100%+2px)] bg-[#0f0f0f] bg-opacity-50 flex items-center justify-center z-[9999] m-0 p-0"
           role="dialog"
           aria-modal="true"
+          style={{ margin: 0, padding: 0 }}
         >
           <div
             className="bg-white rounded-3xl p-6 w-full max-w-2xl mx-4 shadow-2xl"

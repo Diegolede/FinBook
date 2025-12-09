@@ -703,7 +703,7 @@ const Expenses: React.FC = () => {
 
       {/* Modal de Meta Mensual */}
       {showGoalModal && (
-        <div className="fixed inset-0 bg-[#0f0f0f] bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed -top-1 -left-1 -right-1 -bottom-1 w-[calc(100%+2px)] h-[calc(100%+2px)] bg-[#0f0f0f] bg-opacity-50 flex items-center justify-center z-[9999] m-0 p-0" style={{ margin: 0, padding: 0 }}>
           <div className="bg-white rounded-3xl p-6 w-full max-w-md mx-4 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-900">
@@ -799,7 +799,7 @@ const Expenses: React.FC = () => {
 
       {/* Modal de Formulario */}
       {showForm && (
-        <div className="fixed inset-0 bg-[#0f0f0f] bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed -top-1 -left-1 -right-1 -bottom-1 w-[calc(100%+2px)] h-[calc(100%+2px)] bg-[#0f0f0f] bg-opacity-50 flex items-center justify-center z-[9999] m-0 p-0" style={{ margin: 0, padding: 0 }}>
           <div className="bg-white rounded-3xl p-6 w-full max-w-md mx-4 shadow-2xl">
             <h2 className="text-xl font-bold text-gray-900 mb-4">
               {editingTransaction ? 'Editar gasto' : 'Nuevo gasto'}
@@ -967,7 +967,7 @@ const Expenses: React.FC = () => {
 
       {/* Modal de Eliminación */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-[#0f0f0f] bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed -top-1 -left-1 -right-1 -bottom-1 w-[calc(100%+2px)] h-[calc(100%+2px)] bg-[#0f0f0f] bg-opacity-50 flex items-center justify-center z-[9999] m-0 p-0" style={{ margin: 0, padding: 0 }}>
           <div className="bg-white rounded-3xl p-6 w-full max-w-md mx-4 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">

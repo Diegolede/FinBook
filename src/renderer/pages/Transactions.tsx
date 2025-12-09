@@ -300,7 +300,7 @@ const Transactions: React.FC = () => {
 
       {/* Transaction Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-[#0f0f0f] bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed -top-1 -left-1 -right-1 -bottom-1 w-[calc(100%+2px)] h-[calc(100%+2px)] bg-[#0f0f0f] bg-opacity-50 flex items-center justify-center z-[9999] m-0 p-0" style={{ margin: 0, padding: 0 }}>
           <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
             <h2 className="text-xl font-bold text-gray-900 mb-4">
               {editingTransaction ? 'Editar Transacción' : 'Nueva Transacción'}
