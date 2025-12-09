@@ -648,13 +648,18 @@ const Expenses: React.FC = () => {
                         <p className="text-xs text-gray-400 mt-1">{transaction.notes}</p>
                       )}
                       {/* Información de tarjeta de crédito */}
-                      {transaction.creditCardId && (
-                        <div className="flex items-center space-x-2 mt-1">
-                          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
-                            {creditCards.find(card => card.id === transaction.creditCardId)?.name || 'Tarjeta'}
-                          </span>
-                        </div>
-                      )}
+                      {transaction.creditCardId && (() => {
+                        const card = creditCards.find(c => c.id === transaction.creditCardId);
+                        if (!card) return null;
+                        const cardDisplay = card.bank ? `${card.name} ${card.bank}` : card.name;
+                        return (
+                          <div className="flex items-center space-x-2 mt-1">
+                            <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
+                              {cardDisplay}
+                            </span>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                   
@@ -988,13 +993,18 @@ const Expenses: React.FC = () => {
                     {transactionToDelete && format(new Date(transactionToDelete.date), 'dd/MM/yyyy', { locale: es })}
                   </p>
                   {/* Información de tarjeta de crédito en modal */}
-                  {transactionToDelete?.creditCardId && (
-                    <div className="flex items-center space-x-2 mt-1">
-                      <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
-                        {creditCards.find(card => card.id === transactionToDelete.creditCardId)?.name || 'Tarjeta'}
-                      </span>
-                    </div>
-                  )}
+                  {transactionToDelete?.creditCardId && (() => {
+                    const card = creditCards.find(c => c.id === transactionToDelete.creditCardId);
+                    if (!card) return null;
+                    const cardDisplay = card.bank ? `${card.name} ${card.bank}` : card.name;
+                    return (
+                      <div className="flex items-center space-x-2 mt-1">
+                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
+                          {cardDisplay}
+                        </span>
+                      </div>
+                    );
+                  })()}
                 </div>
                 <div className="text-right">
                   <p className="font-semibold text-gray-700">
