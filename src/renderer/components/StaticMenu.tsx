@@ -35,11 +35,11 @@ const StaticMenu: React.FC = () => {
     >
       {/* Header with Logo */}
       <div className="p-4 pb-3">
-        <NavLink to="/" className="flex items-center justify-center select-none">
+        <NavLink to="/" className="flex items-center justify-center select-none group">
           <img 
             src={finbookLogo} 
             alt="Finbook Logo" 
-            className="block transition-all duration-300 w-12 h-12 rounded-xl" 
+            className="block transition-all duration-300 w-12 h-12 rounded-xl group-hover:scale-110 group-active:scale-95" 
           />
         </NavLink>
       </div>
@@ -68,9 +68,9 @@ const StaticMenu: React.FC = () => {
                 className={({ isActive }) => {
                   const baseClasses = "group relative flex items-center justify-center text-sm font-medium rounded-xl transition-all duration-300 ease-[cubic-bezier(.22,1,.36,1)] focus:outline-none transform";
                   if (isActive) {
-                    return `${baseClasses} w-12 h-12 bg-[#0f0f0f] text-white shadow-sm`;
+                    return `${baseClasses} w-12 h-12 bg-[#0f0f0f] text-white shadow-sm hover:scale-110 active:scale-95`;
                   }
-                  return `${baseClasses} w-12 h-12 text-gray-600 hover:text-gray-900 hover:bg-gray-50 hover:shadow-sm`;
+                  return `${baseClasses} w-12 h-12 text-gray-600 hover:text-gray-900 hover:bg-gray-50 hover:shadow-sm hover:scale-110 active:scale-95`;
                 }}
                 title={item.label}
               >
@@ -106,7 +106,7 @@ const StaticMenu: React.FC = () => {
                 console.error('Error al cerrar la aplicación:', error);
               }
             }}
-            className="group relative flex items-center justify-center w-12 h-12 text-gray-600 hover:text-gray-900 hover:bg-gray-50 hover:shadow-sm rounded-xl transition-all duration-300 ease-[cubic-bezier(.22,1,.36,1)] focus:outline-none transform"
+            className="group relative flex items-center justify-center w-12 h-12 text-gray-600 hover:text-gray-900 hover:bg-gray-50 hover:shadow-sm rounded-xl transition-all duration-300 ease-[cubic-bezier(.22,1,.36,1)] focus:outline-none transform hover:scale-110 active:scale-95"
             title="Salir de la aplicación"
           >
             <LogOut className="transition-all duration-300 w-6 h-6 text-gray-500 group-hover:text-gray-700" />
