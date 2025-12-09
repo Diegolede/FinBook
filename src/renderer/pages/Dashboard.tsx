@@ -247,8 +247,8 @@ const Dashboard: React.FC = () => {
       {/* Segunda fila: Acciones Rápidas + Método 50-30-20 */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
         {/* Acciones Rápidas */}
-        <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-200 transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg">
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">Acciones rápidas</h3>
+        <div className="bg-white rounded-3xl px-5 pt-8 pb-5 shadow-sm border border-gray-200 transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg flex flex-col">
+          <h3 className="text-sm font-semibold text-gray-900 mb-6">Acciones rápidas</h3>
           <div className="space-y-2">
             <button onClick={() => handleQuickAction('income')} className="w-full flex items-center space-x-2 p-3 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md border border-gray-200">
               <div className="w-8 h-8 bg-gray-100 rounded-xl flex items-center justify-center">
