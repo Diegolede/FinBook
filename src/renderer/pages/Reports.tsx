@@ -10,8 +10,9 @@ import {
   Filter
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { es, enUS } from 'date-fns/locale';
 import { formatCurrency } from '../utils/currency';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -56,6 +57,7 @@ interface Category {
 }
 
 const Reports: React.FC = () => {
+  const { t, language } = useLanguage();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -151,17 +153,17 @@ const Reports: React.FC = () => {
     return {
       labels: sortedMonths.map(month => {
         const [year, monthNum] = month.split('-');
-        return format(new Date(parseInt(year), parseInt(monthNum) - 1), 'MMM yyyy', { locale: es });
+        return format(new Date(parseInt(year), parseInt(monthNum) - 1), 'MMM yyyy', { locale: language === 'es' ? es : enUS });
       }),
       datasets: [
         {
-          label: 'Ingresos',
+          label: t.reports.income,
           data: sortedMonths.map(month => monthlyTotals[month].income),
           backgroundColor: '#10B981',
           borderColor: '#10B981',
         },
         {
-          label: 'Gastos',
+          label: t.reports.expenses,
           data: sortedMonths.map(month => monthlyTotals[month].expenses),
           backgroundColor: '#EF4444',
           borderColor: '#EF4444',
@@ -190,7 +192,7 @@ const Reports: React.FC = () => {
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando reportes...</p>
+          <p className="mt-4 text-gray-600">{t.reports.loadingReports}</p>
         </div>
       </div>
     );
@@ -203,8 +205,8 @@ const Reports: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Reportes</h1>
-          <p className="text-gray-600">Análisis detallado de tus finanzas</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t.reports.title}</h1>
+          <p className="text-gray-600">{t.reports.subtitle}</p>
         </div>
         
         <div className="flex items-center space-x-4">
@@ -215,10 +217,10 @@ const Reports: React.FC = () => {
               onChange={(e) => setSelectedPeriod(e.target.value)}
               className="select"
             >
-              <option value="week">Última Semana</option>
-              <option value="month">Último Mes</option>
-              <option value="year">Último Año</option>
-              <option value="all">Todo</option>
+              <option value="week">{t.reports.lastWeek}</option>
+              <option value="month">{t.reports.lastMonth}</option>
+              <option value="year">{t.reports.lastYear}</option>
+              <option value="all">{t.reports.all}</option>
             </select>
           </div>
         </div>
@@ -229,7 +231,7 @@ const Reports: React.FC = () => {
         <div className="card">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Balance</p>
+              <p className="text-sm font-medium text-gray-600">{t.reports.balance}</p>
               <p className={`text-2xl font-bold ${summaryStats.balance >= 0 ? 'text-success-600' : 'text-danger-600'}`}>
                 {formatCurrency(summaryStats.balance)}
               </p>
@@ -243,7 +245,7 @@ const Reports: React.FC = () => {
         <div className="card">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Ingresos</p>
+              <p className="text-sm font-medium text-gray-600">{t.reports.income}</p>
               <p className="text-2xl font-bold text-success-600">
                 {formatCurrency(summaryStats.totalIncome)}
               </p>
@@ -257,7 +259,7 @@ const Reports: React.FC = () => {
         <div className="card">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Gastos</p>
+              <p className="text-sm font-medium text-gray-600">{t.reports.expenses}</p>
               <p className="text-2xl font-bold text-danger-600">
                 {formatCurrency(summaryStats.totalExpenses)}
               </p>
@@ -273,7 +275,7 @@ const Reports: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Monthly Trend */}
         <div className="card">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Tendencia Mensual</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">{t.reports.monthlyTrend}</h3>
           <Bar 
             data={getMonthlyData()} 
             options={{
@@ -294,7 +296,7 @@ const Reports: React.FC = () => {
 
         {/* Category Distribution */}
         <div className="card">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Distribución por Categorías</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">{t.reports.categoryDistribution}</h3>
           <Doughnut 
             data={getCategoryData()} 
             options={{
@@ -311,7 +313,7 @@ const Reports: React.FC = () => {
 
       {/* Top Categories */}
       <div className="card">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Categorías Principales</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">{t.reports.topCategories}</h3>
         <div className="space-y-4">
           {(() => {
             const filteredTransactions = getFilteredTransactions();
@@ -340,7 +342,7 @@ const Reports: React.FC = () => {
                     ></div>
                     <div>
                       <p className="font-medium text-gray-900">{category}</p>
-                      <p className="text-sm text-gray-500">{percentage.toFixed(1)}% del total</p>
+                      <p className="text-sm text-gray-500">{percentage.toFixed(1)}% {t.reports.ofTotal}</p>
                     </div>
                   </div>
                   <p className="font-semibold text-danger-600">

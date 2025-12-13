@@ -11,8 +11,9 @@ import {
   X
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { es, enUS } from 'date-fns/locale';
 import { formatCurrency } from '../utils/currency';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface Transaction {
   id: string;
@@ -32,6 +33,7 @@ interface Category {
 }
 
 const Transactions: React.FC = () => {
+  const { t, language } = useLanguage();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -95,7 +97,7 @@ const Transactions: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('¿Estás seguro de que quieres eliminar esta transacción?')) {
+      if (confirm(t.transactions.confirmDelete)) {
       try {
         await window.electronAPI.deleteTransaction(id);
         await loadData();
@@ -146,7 +148,7 @@ const Transactions: React.FC = () => {
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando transacciones...</p>
+          <p className="mt-4 text-gray-600">{t.transactions.loadingTransactions}</p>
         </div>
       </div>
     );
@@ -157,15 +159,15 @@ const Transactions: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Transacciones</h1>
-          <p className="text-gray-600">Gestiona tus ingresos y gastos</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t.transactions.title}</h1>
+          <p className="text-gray-600">{t.transactions.subtitle}</p>
         </div>
         <button 
           onClick={() => setShowForm(true)}
           className="btn btn-primary flex items-center space-x-2"
         >
           <Plus className="w-5 h-5" />
-          <span>Nueva Transacción</span>
+          <span>{t.transactions.newTransaction}</span>
         </button>
       </div>
 
@@ -174,13 +176,13 @@ const Transactions: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Buscar
+              {t.transactions.search}
             </label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Buscar transacciones..."
+                placeholder={t.transactions.searchTransactions}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="input pl-10"
@@ -197,9 +199,9 @@ const Transactions: React.FC = () => {
               onChange={(e) => setFilterType(e.target.value as 'all' | 'income' | 'expense')}
               className="select"
             >
-              <option value="all">Todos</option>
-              <option value="income">Ingresos</option>
-              <option value="expense">Gastos</option>
+              <option value="all">{t.transactions.all}</option>
+              <option value="income">{t.transactions.income}</option>
+              <option value="expense">{t.transactions.expense}</option>
             </select>
           </div>
 
@@ -212,7 +214,7 @@ const Transactions: React.FC = () => {
               onChange={(e) => setFilterCategory(e.target.value)}
               className="select"
             >
-              <option value="all">Todas</option>
+              <option value="all">{t.transactions.allCategories}</option>
               {categories.map(category => (
                 <option key={category.id} value={category.name}>
                   {category.name}
@@ -230,7 +232,7 @@ const Transactions: React.FC = () => {
               }}
               className="btn btn-secondary w-full"
             >
-              Limpiar Filtros
+              {t.transactions.clearFilters}
             </button>
           </div>
         </div>
@@ -269,7 +271,7 @@ const Transactions: React.FC = () => {
                       {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
                     </p>
                     <p className="text-xs text-gray-500">
-                      {format(new Date(transaction.date), 'dd/MM/yyyy', { locale: es })}
+                        {format(new Date(transaction.date), 'dd/MM/yyyy', { locale: language === 'es' ? es : enUS })}
                     </p>
                   </div>
                   
@@ -292,7 +294,7 @@ const Transactions: React.FC = () => {
             ))
           ) : (
             <div className="text-center py-8">
-              <p className="text-gray-500">No se encontraron transacciones</p>
+              <p className="text-gray-500">{t.transactions.noTransactions}</p>
             </div>
           )}
         </div>
@@ -303,13 +305,13 @@ const Transactions: React.FC = () => {
         <div className="fixed -top-1 -left-1 -right-1 -bottom-1 w-[calc(100%+2px)] h-[calc(100%+2px)] bg-[#0f0f0f] bg-opacity-50 flex items-center justify-center z-[9999] m-0 p-0" style={{ margin: 0, padding: 0 }}>
           <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
             <h2 className="text-xl font-bold text-gray-900 mb-4">
-              {editingTransaction ? 'Editar Transacción' : 'Nueva Transacción'}
+              {editingTransaction ? t.transactions.editTransaction : t.transactions.newTransactionForm}
             </h2>
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Descripción
+                  {t.transactions.description}
                 </label>
                 <input
                   type="text"
@@ -317,13 +319,13 @@ const Transactions: React.FC = () => {
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
                   className="input"
-                  placeholder="Descripción de la transacción"
+                  placeholder={t.transactions.description}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Monto
+                  {t.transactions.amount}
                 </label>
                 <input
                   type="number"
@@ -333,13 +335,13 @@ const Transactions: React.FC = () => {
                   value={formData.amount}
                   onChange={(e) => setFormData({...formData, amount: e.target.value})}
                   className="input"
-                  placeholder="0.00"
+                  placeholder={t.common.numbersOnly}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tipo
+                  {t.transactions.typeLabel}
                 </label>
                 <select
                   required
@@ -347,14 +349,14 @@ const Transactions: React.FC = () => {
                   onChange={(e) => setFormData({...formData, type: e.target.value as 'income' | 'expense'})}
                   className="select"
                 >
-                  <option value="expense">Gasto</option>
-                  <option value="income">Ingreso</option>
+                  <option value="expense">{t.transactions.expense}</option>
+                  <option value="income">{t.transactions.income}</option>
                 </select>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Categoría
+                  {t.transactions.categoryLabel}
                 </label>
                 <select
                   required
@@ -362,7 +364,7 @@ const Transactions: React.FC = () => {
                   onChange={(e) => setFormData({...formData, category: e.target.value})}
                   className="select"
                 >
-                  <option value="">Seleccionar categoría</option>
+                  <option value="">{t.transactions.selectCategory}</option>
                   {categories
                     .filter(cat => cat.type.toLowerCase() === formData.type.toLowerCase())
                     .map(category => (
@@ -375,7 +377,7 @@ const Transactions: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Fecha
+                  {t.transactions.date}
                 </label>
                 <input
                   type="date"
@@ -388,14 +390,14 @@ const Transactions: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Notas (opcional)
+                  {t.transactions.notes}
                 </label>
                 <textarea
                   value={formData.notes}
                   onChange={(e) => setFormData({...formData, notes: e.target.value})}
                   className="input"
                   rows={3}
-                  placeholder="Notas adicionales..."
+                  placeholder={t.transactions.additionalInfo}
                 />
               </div>
 
@@ -405,13 +407,13 @@ const Transactions: React.FC = () => {
                   onClick={handleCloseForm}
                   className="btn btn-secondary flex-1"
                 >
-                  Cancelar
+                  {t.transactions.cancel}
                 </button>
                 <button
                   type="submit"
                   className="btn btn-primary flex-1"
                 >
-                  {editingTransaction ? 'Actualizar' : 'Guardar'}
+                  {editingTransaction ? t.transactions.update : t.transactions.save}
                 </button>
               </div>
             </form>

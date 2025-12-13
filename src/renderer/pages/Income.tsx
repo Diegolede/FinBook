@@ -10,8 +10,9 @@ import {
   X
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { es, enUS } from 'date-fns/locale';
 import { formatCurrency } from '../utils/currency';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface Transaction {
   id: string;
@@ -41,6 +42,7 @@ interface MonthlyGoal {
 }
 
 const Income: React.FC = () => {
+  const { t, language } = useLanguage();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -118,7 +120,7 @@ const Income: React.FC = () => {
       setTransactions(incomeTransactions);
       setCategories(uniqueIncomeCategories);
 
-      const currentMonth = format(new Date(), 'MMMM', { locale: es });
+      const currentMonth = format(new Date(), 'MMMM', { locale: language === 'es' ? es : enUS });
       const currentYear = new Date().getFullYear();
       const goal = await window.electronAPI.getMonthlyGoal(currentMonth, currentYear, 'income');
       
@@ -165,17 +167,17 @@ const Income: React.FC = () => {
     
     const amount = parseFloat(cleanNumberValue(formData.amount));
     if (isNaN(amount) || amount <= 0) {
-      alert('Por favor, ingresa un monto válido mayor a cero.');
+      alert(`${t.common.pleaseEnter} ${t.common.validAmount} ${t.common.greaterThanZero}.`);
       return;
     }
     
     if (!formData.description.trim()) {
-      alert('Por favor, ingresa una descripción.');
+      alert(`${t.common.pleaseEnter} una descripción.`);
       return;
     }
     
     if (!formData.category) {
-      alert('Por favor, selecciona una categoría.');
+      alert(`${t.common.pleaseSelect} ${t.common.category}.`);
       return;
     }
     
@@ -199,13 +201,13 @@ const Income: React.FC = () => {
       handleCloseForm();
     } catch (error) {
       console.error('Error saving transaction:', error);
-      alert('Error al guardar el ingreso. Por favor, intenta de nuevo.');
+      alert(`${t.common.errorSaving} el ingreso. ${t.common.pleaseEnter} intenta de nuevo.`);
     }
   };
 
   const handleQuickIncome = async (amount: number, description: string) => {
     if (isNaN(amount) || amount <= 0) {
-      alert('Por favor, ingresa un monto válido mayor a cero.');
+      alert(`${t.common.pleaseEnter} ${t.common.validAmount} ${t.common.greaterThanZero}.`);
       return;
     }
     
@@ -213,7 +215,7 @@ const Income: React.FC = () => {
       description,
       amount,
       type: 'income' as const,
-      category: 'Ingreso rápido',
+      category: t.common.quickIncome,
       date: format(new Date(), 'yyyy-MM-dd'),
       notes: 'Ingreso agregado desde acciones rápidas'
     };
@@ -224,7 +226,7 @@ const Income: React.FC = () => {
       setQuickIncomeAmount('');
     } catch (error) {
       console.error('Error saving quick income:', error);
-      alert('Error al guardar el ingreso rápido. Por favor, intenta de nuevo.');
+      alert(`${t.common.errorSaving} el ingreso rápido. ${t.common.pleaseEnter} intenta de nuevo.`);
     }
   };
 
@@ -243,7 +245,7 @@ const Income: React.FC = () => {
     
     const targetAmount = parseFloat(cleanNumberValue(goalFormData.targetAmount));
     if (isNaN(targetAmount) || targetAmount <= 0) {
-      alert('Por favor, ingresa un monto objetivo válido mayor a cero.');
+      alert(`${t.common.pleaseEnter} un monto objetivo válido ${t.common.greaterThanZero}.`);
       return;
     }
     
@@ -264,7 +266,7 @@ const Income: React.FC = () => {
       const goalData = {
         targetAmount,
         notes: goalFormData.notes,
-        month: format(new Date(), 'MMMM', { locale: es }),
+        month: format(new Date(), 'MMMM', { locale: language === 'es' ? es : enUS }),
         year: new Date().getFullYear(),
         type: 'income' as const,
         currentAmount: calculatedCurrentAmount
@@ -276,7 +278,7 @@ const Income: React.FC = () => {
       setGoalFormData({ targetAmount: '', notes: '' });
     } catch (error) {
       console.error('Error saving monthly goal:', error);
-      alert('Error al guardar la meta mensual. Por favor, intenta de nuevo.');
+      alert(`${t.common.errorSaving} la meta mensual. ${t.common.pleaseEnter} intenta de nuevo.`);
     }
   };
 
@@ -354,7 +356,7 @@ const Income: React.FC = () => {
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando datos...</p>
+          <p className="mt-4 text-gray-600">{t.income.loadingData}</p>
         </div>
       </div>
     );
@@ -364,8 +366,8 @@ const Income: React.FC = () => {
     <div className="pt-8 pb-6 px-6 space-y-6 max-w-[90rem] mx-auto relative z-10">
       {/* Título de la sección */}
       <div className="mb-2">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Ingresos</h1>
-        <p className="text-sm text-gray-600">Agrega tus ingresos, establece metas mensuales y lleva un registro completo de todo el dinero que recibes</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">{t.income.title}</h1>
+        <p className="text-sm text-gray-600">{t.income.subtitle}</p>
       </div>
 
       {/* Header con estadísticas principales */}
@@ -377,8 +379,8 @@ const Income: React.FC = () => {
                 <TrendingUp className="w-7 h-7 text-gray-600" />
               </div>
               <div>
-                <p className="text-base font-medium text-gray-600">Total acumulado</p>
-                <p className="text-xs text-gray-500">Historial completo</p>
+                <p className="text-base font-medium text-gray-600">{t.income.totalAccumulated}</p>
+                <p className="text-xs text-gray-500">{t.income.fullHistory}</p>
               </div>
             </div>
           </div>
@@ -392,8 +394,8 @@ const Income: React.FC = () => {
                 <Calendar className="w-7 h-7 text-gray-600" />
               </div>
               <div>
-                <p className="text-base font-medium text-gray-600">Mes actual</p>
-                <p className="text-xs text-gray-500">Ingresos del período</p>
+                <p className="text-base font-medium text-gray-600">{t.income.currentMonth}</p>
+                <p className="text-xs text-gray-500">{t.income.periodIncome}</p>
               </div>
             </div>
           </div>
@@ -407,8 +409,8 @@ const Income: React.FC = () => {
                 <TrendingUp className="w-7 h-7 text-gray-600" />
               </div>
               <div>
-                <p className="text-base font-medium text-gray-600">Promedio</p>
-                <p className="text-xs text-gray-500">Por ingreso</p>
+                <p className="text-base font-medium text-gray-600">{t.income.average}</p>
+                <p className="text-xs text-gray-500">{t.income.perIncome}</p>
               </div>
             </div>
           </div>
@@ -422,7 +424,7 @@ const Income: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           {/* Acciones Rápidas */}
           <div className="bg-white rounded-3xl px-5 pt-8 pb-5 shadow-sm border border-gray-200 transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg flex flex-col">
-            <h3 className="text-base font-semibold text-gray-900 mb-6">Acciones rápidas</h3>
+            <h3 className="text-base font-semibold text-gray-900 mb-6">{t.income.quickActions}</h3>
             <div className="space-y-2">
               <button 
                 onClick={() => setShowForm(true)}
@@ -432,7 +434,7 @@ const Income: React.FC = () => {
                   <Plus className="w-4 h-4 text-gray-600" />
                 </div>
                 <div className="text-left">
-                  <p className="text-xs font-medium text-gray-900">Nuevo ingreso</p>
+                  <p className="text-xs font-medium text-gray-900">{t.income.newIncome}</p>
                 </div>
               </button>
               <button 
@@ -443,7 +445,7 @@ const Income: React.FC = () => {
                   <BookHeart className="w-4 h-4 text-gray-600" />
                 </div>
                 <div className="text-left">
-                  <p className="text-xs font-medium text-gray-900">Meta mensual</p>
+                  <p className="text-xs font-medium text-gray-900">{t.income.monthlyGoal}</p>
                   {monthlyGoal && (
                     <p className="text-xs text-gray-500">
                       {formatCurrency(monthlyGoal.currentAmount)} / {formatCurrency(monthlyGoal.targetAmount)}
@@ -461,7 +463,7 @@ const Income: React.FC = () => {
                   <div className="flex-1">
                     <input
                       type="text"
-                      placeholder="Monto del ingreso rápido"
+                      placeholder={t.income.quickIncomeAmount}
                       value={quickIncomeAmount}
                       onChange={(e) => setQuickIncomeAmount(formatNumberInput(e.target.value))}
                       className="w-full text-xs bg-white border-none outline-none placeholder-gray-500"
@@ -470,10 +472,10 @@ const Income: React.FC = () => {
                 </div>
                 {quickIncomeAmount && (
                   <button 
-                    onClick={() => handleQuickIncome(parseFloat(cleanNumberValue(quickIncomeAmount)), 'Ingreso rápido')}
+                    onClick={() => handleQuickIncome(parseFloat(cleanNumberValue(quickIncomeAmount)), t.common.quickIncome)}
                     className="w-full px-3 py-2 bg-gray-900 text-white text-xs rounded-xl hover:bg-gray-800 transition-colors"
                   >
-                    Agregar {formatCurrency(parseFloat(cleanNumberValue(quickIncomeAmount)))}
+                    {t.income.add} {formatCurrency(parseFloat(cleanNumberValue(quickIncomeAmount)))}
                   </button>
                 )}
               </div>
@@ -483,7 +485,7 @@ const Income: React.FC = () => {
           {/* Meta Mensual */}
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200 transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-gray-900">Meta mensual de ingresos</h3>
+              <h3 className="text-sm font-semibold text-gray-900">{t.income.monthlyIncomeGoal}</h3>
               <button 
                 onClick={handleMonthlyGoal}
                 className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
@@ -497,17 +499,17 @@ const Income: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-2xl font-bold text-gray-900">{formatCurrency(monthlyGoal.currentAmount)}</p>
-                    <p className="text-xs text-gray-500">Acumulado del mes</p>
+                    <p className="text-xs text-gray-500">{t.income.accumulatedMonth}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-lg font-semibold text-gray-700">{formatCurrency(monthlyGoal.targetAmount)}</p>
-                    <p className="text-xs text-gray-500">Meta mensual</p>
+                    <p className="text-xs text-gray-500">{t.income.goalMonthly}</p>
                   </div>
                 </div>
                 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-gray-600">Progreso</span>
+                    <span className="text-gray-600">{t.income.progress}</span>
                     <span className="text-gray-500">{goalProgress.toFixed(1)}%</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-3">
@@ -519,7 +521,7 @@ const Income: React.FC = () => {
                 </div>
                 
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-500">Faltan</span>
+                  <span className="text-gray-500">{t.income.remaining}</span>
                   <span className="font-medium text-gray-700">
                     {formatCurrency(Math.max(0, monthlyGoal.targetAmount - monthlyGoal.currentAmount))}
                   </span>
@@ -528,13 +530,13 @@ const Income: React.FC = () => {
             ) : (
               <div className="text-center py-8">
                 <BookHeart className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500 text-sm mb-1">Define tu objetivo mensual</p>
-                <p className="text-xs text-gray-400">Establece una meta para mantener un control mejor de tus ingresos</p>
+                <p className="text-gray-500 text-sm mb-1">{t.income.defineObjective}</p>
+                <p className="text-xs text-gray-400">{t.income.maintainControl}</p>
                 <button 
                   onClick={handleMonthlyGoal}
                   className="mt-3 px-4 py-2 bg-gray-900 text-white text-xs rounded-xl hover:bg-gray-800 transition-colors"
                 >
-                  Establecer meta
+                  {t.income.setGoal}
                 </button>
               </div>
             )}
@@ -548,7 +550,7 @@ const Income: React.FC = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Buscar ingresos..."
+                placeholder={t.income.searchIncome}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
@@ -560,7 +562,7 @@ const Income: React.FC = () => {
                 onChange={(e) => setFilterCategory(e.target.value)}
                 className="px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
               >
-                <option value="all">Ver todas</option>
+                <option value="all">{t.income.viewAll}</option>
                 {categories.map(category => (
                   <option key={category.id} value={category.name}>
                     {category.name}
@@ -603,7 +605,7 @@ const Income: React.FC = () => {
                         +{formatCurrency(transaction.amount)}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {format(new Date(transaction.date), 'dd/MM/yyyy', { locale: es })}
+                        {format(new Date(transaction.date), 'dd/MM/yyyy', { locale: language === 'es' ? es : enUS })}
                       </p>
                     </div>
                     
@@ -627,8 +629,8 @@ const Income: React.FC = () => {
             ) : (
               <div className="text-center py-8">
                 <TrendingUp className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500 mb-2">Comienza registrando tu primer ingreso</p>
-                <p className="text-xs text-gray-400">Usa el botón "Nuevo ingreso" o el ingreso rápido para empezar</p>
+                <p className="text-gray-500 mb-2">{t.income.startRegistering}</p>
+                <p className="text-xs text-gray-400">{t.income.useNewIncome}</p>
               </div>
             )}
           </div>
@@ -641,7 +643,7 @@ const Income: React.FC = () => {
           <div className="bg-white rounded-3xl p-6 w-full max-w-md mx-4 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-900">
-                Meta mensual de ingresos
+                {t.income.incomeGoal}
               </h2>
               <button
                 onClick={handleCloseGoalModal}
@@ -674,8 +676,8 @@ const Income: React.FC = () => {
             <form onSubmit={handleGoalSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Meta de ingresos mensual
-                  <span className="text-xs text-gray-500 ml-1">(objetivo a alcanzar)</span>
+                  {t.income.incomeGoal}
+                  <span className="text-xs text-gray-500 ml-1">{t.income.objectiveToReach}</span>
                 </label>
                 <input
                   type="text"
@@ -683,7 +685,7 @@ const Income: React.FC = () => {
                     value={goalFormData.targetAmount}
                     onChange={(e) => setGoalFormData({...goalFormData, targetAmount: formatNumberInput(e.target.value)})}
                     className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                  placeholder="0.00 (solo números)"
+                  placeholder={t.common.numbersOnly}
                 />
               </div>
 
@@ -696,7 +698,7 @@ const Income: React.FC = () => {
                     onChange={(e) => setGoalFormData({...goalFormData, notes: e.target.value})}
                     className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                   rows={3}
-                  placeholder="Notas sobre tu meta mensual..."
+                  placeholder={t.income.additionalInfo}
                 />
               </div>
 
@@ -706,13 +708,13 @@ const Income: React.FC = () => {
                   onClick={handleCloseGoalModal}
                   className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
                 >
-                  Cancelar
+                  {t.income.cancel}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 px-4 py-2 bg-[#0f0f0f] text-white rounded-xl hover:bg-gray-800 transition-colors"
                 >
-                  Guardar Meta
+                  {t.income.save} {t.income.monthlyGoal}
                 </button>
               </div>
             </form>
@@ -725,14 +727,14 @@ const Income: React.FC = () => {
         <div className="fixed -top-1 -left-1 -right-1 -bottom-1 w-[calc(100%+2px)] h-[calc(100%+2px)] bg-[#0f0f0f] bg-opacity-50 flex items-center justify-center z-[9999] m-0 p-0" style={{ margin: 0, padding: 0 }}>
           <div className="bg-white rounded-3xl p-6 w-full max-w-md mx-4 shadow-2xl">
             <h2 className="text-xl font-bold text-gray-900 mb-4">
-              {editingTransaction ? 'Editar ingreso' : 'Nuevo ingreso'}
+              {editingTransaction ? t.income.editIncome : t.income.newIncomeForm}
             </h2>
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Descripción
-                  <span className="text-xs text-gray-500 ml-1">(origen del ingreso)</span>
+                  {t.income.description}
+                  <span className="text-xs text-gray-500 ml-1">{t.income.origin}</span>
                 </label>
                 <input
                   type="text"
@@ -740,14 +742,14 @@ const Income: React.FC = () => {
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                  placeholder="Ej: Salario mensual, trabajo freelance, venta de producto..."
+                  placeholder={`${t.common.example} ${language === 'es' ? 'Salario mensual, trabajo freelance, venta de producto...' : 'Monthly salary, freelance work, product sale...'}`}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Monto
-                  <span className="text-xs text-gray-500 ml-1">(cantidad recibida)</span>
+                  {t.income.amount}
+                  <span className="text-xs text-gray-500 ml-1">{t.income.amountReceived}</span>
                 </label>
                 <input
                   type="text"
@@ -755,13 +757,13 @@ const Income: React.FC = () => {
                   value={formData.amount}
                   onChange={(e) => setFormData({...formData, amount: formatNumberInput(e.target.value)})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                  placeholder="0.00 (solo números)"
+                  placeholder={t.common.numbersOnly}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Categoría
+                  {t.income.category}
                 </label>
                 <select
                   required
@@ -769,7 +771,7 @@ const Income: React.FC = () => {
                   onChange={(e) => setFormData({...formData, category: e.target.value})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                 >
-                  <option value="">Seleccionar categoría</option>
+                  <option value="">{t.income.selectCategory}</option>
                   {categories.map(category => (
                     <option key={category.id} value={category.name}>
                       {category.name}
@@ -780,7 +782,7 @@ const Income: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Fecha
+                  {t.income.date}
                 </label>
                 <input
                   type="date"
@@ -800,7 +802,7 @@ const Income: React.FC = () => {
                   onChange={(e) => setFormData({...formData, notes: e.target.value})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                   rows={3}
-                  placeholder="Información adicional (opcional)"
+                  placeholder={t.income.additionalInfo}
                 />
               </div>
 
@@ -810,13 +812,13 @@ const Income: React.FC = () => {
                   onClick={handleCloseForm}
                   className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
                 >
-                  Cancelar
+                  {t.income.cancel}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 px-4 py-2 bg-[#0f0f0f] text-white rounded-xl hover:bg-gray-800 transition-colors"
                 >
-                  {editingTransaction ? 'Actualizar' : 'Guardar'}
+                  {editingTransaction ? t.income.update : t.income.save}
                 </button>
               </div>
             </form>
@@ -830,7 +832,7 @@ const Income: React.FC = () => {
           <div className="bg-white rounded-3xl p-6 w-full max-w-md mx-4 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">
-                Confirmar eliminación
+                {t.income.confirmDelete}
               </h2>
               <button
                 onClick={cancelDelete}
@@ -849,7 +851,7 @@ const Income: React.FC = () => {
                   <h3 className="font-medium text-gray-900">{transactionToDelete?.description}</h3>
                   <p className="text-sm text-gray-500">{transactionToDelete?.category}</p>
                   <p className="text-xs text-gray-400">
-                    {transactionToDelete && format(new Date(transactionToDelete.date), 'dd/MM/yyyy', { locale: es })}
+                    {transactionToDelete && format(new Date(transactionToDelete.date), 'dd/MM/yyyy', { locale: language === 'es' ? es : enUS })}
                   </p>
                 </div>
                 <div className="text-right">
@@ -861,7 +863,7 @@ const Income: React.FC = () => {
             </div>
 
             <p className="text-gray-700 mb-6">
-              Esta acción eliminará permanentemente el ingreso. ¿Deseas continuar?
+              {t.income.deletePermanently}
             </p>
 
             <div className="flex space-x-3">
@@ -870,14 +872,14 @@ const Income: React.FC = () => {
                 onClick={cancelDelete}
                 className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
               >
-                Cancelar
+                {t.income.cancel}
               </button>
               <button
                 type="button"
                 onClick={confirmDelete}
                 className="flex-1 px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors"
               >
-                Eliminar
+                {t.income.delete}
               </button>
             </div>
           </div>

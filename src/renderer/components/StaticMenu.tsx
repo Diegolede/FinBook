@@ -15,20 +15,28 @@ import {
   TrendingDown, 
   PiggyBank,
   LogOut,
+  Settings,
 } from 'lucide-react';
 import finbookLogo from '../Finbook-logo.svg';
+import { useLanguage } from '../contexts/LanguageContext';
 
-// --- Navigation Items ---
-const navItems = [
-  { path: '/', icon: Notebook, label: 'Inicio' },
-  { path: '/income', icon: TrendingUp, label: 'Ingresos' },
-  { path: '/expenses', icon: TrendingDown, label: 'Gastos' },
-  { path: '/credit-cards', icon: CreditCard, label: 'Tarjetas' },
-  { path: '/savings', icon: PiggyBank, label: 'Ahorros' },
-];
+interface StaticMenuProps {
+  onOpenSettings: () => void;
+}
 
 // --- StaticMenu Component ---
-const StaticMenu: React.FC = () => {
+const StaticMenu: React.FC<StaticMenuProps> = ({ onOpenSettings }) => {
+  const { t } = useLanguage();
+
+  // --- Navigation Items ---
+  const navItems = [
+    { path: '/', icon: Notebook, label: t.menu.home },
+    { path: '/income', icon: TrendingUp, label: t.menu.income },
+    { path: '/expenses', icon: TrendingDown, label: t.menu.expenses },
+    { path: '/credit-cards', icon: CreditCard, label: t.menu.cards },
+    { path: '/savings', icon: PiggyBank, label: t.menu.savings },
+  ];
+
   return (
     <aside 
       className="h-screen bg-white border-r border-gray-200 shadow-md flex flex-col animate-slide-in-left transition-all duration-300 ease-in-out w-20"
@@ -85,7 +93,7 @@ const StaticMenu: React.FC = () => {
         </ul>
       </nav>
 
-      {/* Footer area - Quit button */}
+      {/* Footer area - Settings and Quit buttons */}
       <div className="mt-auto">
         {/* Separator */}
         <div className="px-4 pt-2 pb-1">
@@ -96,8 +104,19 @@ const StaticMenu: React.FC = () => {
           </div>
         </div>
 
+        {/* Settings button */}
+        <div className="p-4 pt-2 pb-2">
+          <button
+            onClick={onOpenSettings}
+            className="group relative flex items-center justify-center w-12 h-12 text-gray-600 hover:text-gray-900 hover:bg-gray-50 hover:shadow-sm rounded-xl transition-all duration-300 ease-[cubic-bezier(.22,1,.36,1)] focus:outline-none transform hover:scale-110 active:scale-95"
+            title={t.menu.settings}
+          >
+            <Settings className="transition-all duration-300 w-6 h-6 text-gray-500 group-hover:text-gray-700" />
+          </button>
+        </div>
+
         {/* Quit button */}
-        <div className="p-4 pt-2">
+        <div className="p-4 pt-0 pb-2">
           <button
             onClick={async () => {
               try {
@@ -107,7 +126,7 @@ const StaticMenu: React.FC = () => {
               }
             }}
             className="group relative flex items-center justify-center w-12 h-12 text-gray-600 hover:text-gray-900 hover:bg-gray-50 hover:shadow-sm rounded-xl transition-all duration-300 ease-[cubic-bezier(.22,1,.36,1)] focus:outline-none transform hover:scale-110 active:scale-95"
-            title="Salir de la aplicación"
+            title={t.menu.quit}
           >
             <LogOut className="transition-all duration-300 w-6 h-6 text-gray-500 group-hover:text-gray-700" />
           </button>

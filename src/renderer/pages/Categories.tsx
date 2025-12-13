@@ -5,6 +5,7 @@ import {
   Trash2,
   Tag
 } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface Category {
   id: string;
@@ -14,6 +15,7 @@ interface Category {
 }
 
 const Categories: React.FC = () => {
+  const { t } = useLanguage();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -90,7 +92,7 @@ const Categories: React.FC = () => {
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando categorías...</p>
+          <p className="mt-4 text-gray-600">{t.categories.loadingCategories}</p>
         </div>
       </div>
     );
@@ -101,15 +103,15 @@ const Categories: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Categorías</h1>
-          <p className="text-gray-600">Gestiona las categorías de tus transacciones</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t.categories.title}</h1>
+          <p className="text-gray-600">{t.categories.subtitle}</p>
         </div>
         <button 
           onClick={() => setShowForm(true)}
           className="btn btn-primary flex items-center space-x-2"
         >
           <Plus className="w-5 h-5" />
-          <span>Nueva Categoría</span>
+          <span>{t.categories.newCategory}</span>
         </button>
       </div>
 
@@ -119,7 +121,7 @@ const Categories: React.FC = () => {
         <div className="card">
           <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
             <span className="w-3 h-3 bg-success-500 rounded-full mr-2"></span>
-            Categorías de Ingresos
+            {t.categories.incomeCategories}
           </h3>
           <div className="space-y-3">
             {categories
@@ -148,7 +150,7 @@ const Categories: React.FC = () => {
         <div className="card">
           <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
             <span className="w-3 h-3 bg-danger-500 rounded-full mr-2"></span>
-            Categorías de Gastos
+            {t.categories.expenseCategories}
           </h3>
           <div className="space-y-3">
             {categories
@@ -179,13 +181,13 @@ const Categories: React.FC = () => {
         <div className="fixed -top-1 -left-1 -right-1 -bottom-1 w-[calc(100%+2px)] h-[calc(100%+2px)] bg-[#0f0f0f] bg-opacity-50 flex items-center justify-center z-[9999] m-0 p-0" style={{ margin: 0, padding: 0 }}>
           <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
             <h2 className="text-xl font-bold text-gray-900 mb-4">
-              {editingCategory ? 'Editar Categoría' : 'Nueva Categoría'}
+              {editingCategory ? t.categories.editCategory : t.categories.newCategoryForm}
             </h2>
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nombre
+                  {t.categories.name}
                 </label>
                 <input
                   type="text"
@@ -193,13 +195,13 @@ const Categories: React.FC = () => {
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
                   className="input"
-                  placeholder="Nombre de la categoría"
+                  placeholder={t.categories.name}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tipo
+                  {t.categories.type}
                 </label>
                 <select
                   required
@@ -207,14 +209,14 @@ const Categories: React.FC = () => {
                   onChange={(e) => setFormData({...formData, type: e.target.value as 'income' | 'expense'})}
                   className="select"
                 >
-                  <option value="expense">Gasto</option>
-                  <option value="income">Ingreso</option>
+                  <option value="expense">{t.categories.expense}</option>
+                  <option value="income">{t.categories.income}</option>
                 </select>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Color
+                  {t.categories.color}
                 </label>
                 <div className="grid grid-cols-6 gap-2">
                   {colorOptions.map(color => (
@@ -237,13 +239,13 @@ const Categories: React.FC = () => {
                   onClick={handleCloseForm}
                   className="btn btn-secondary flex-1"
                 >
-                  Cancelar
+                  {t.categories.cancel}
                 </button>
                 <button
                   type="submit"
                   className="btn btn-primary flex-1"
                 >
-                  {editingCategory ? 'Actualizar' : 'Guardar'}
+                  {editingCategory ? t.categories.update : t.categories.save}
                 </button>
               </div>
             </form>

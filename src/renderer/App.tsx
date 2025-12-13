@@ -6,7 +6,7 @@
  * All rights reserved.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import StaticMenu from './components/StaticMenu';
 import Dashboard from './pages/Dashboard';
@@ -14,10 +14,14 @@ import Income from './pages/Income';
 import Expenses from './pages/Expenses';
 import CreditCards from './pages/CreditCards';
 import Savings from './pages/Savings';
+import SettingsModal from './components/Settings';
+import { useLanguage } from './contexts/LanguageContext';
 
 function App() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useLanguage();
+  const [showSettings, setShowSettings] = useState(false);
 
   // Asegurar que siempre se muestre la home al iniciar
   useEffect(() => {
@@ -43,7 +47,7 @@ function App() {
 
   return (
     <div className="flex h-screen bg-white relative">
-      <StaticMenu />
+      <StaticMenu onOpenSettings={() => setShowSettings(true)} />
       <main className="flex-1 overflow-auto bg-white relative">
         <div className="w-full max-w-[90rem] mx-auto relative z-10 px-6">
           <Routes>
@@ -59,9 +63,12 @@ function App() {
         </div>
         {/* Versión en la parte inferior derecha */}
         <div className="fixed bottom-4 right-4 z-10 text-right">
-          <p className="text-sm text-gray-400 select-none font-medium">FinBook v1.0.8</p>
+          <p className="text-sm text-gray-400 select-none font-medium">{t.app.version}</p>
         </div>
       </main>
+      
+      {/* Settings Modal - Centered in the app */}
+      <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
     </div>
   );
 }

@@ -11,8 +11,9 @@ import {
   Minus
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { es, enUS } from 'date-fns/locale';
 import { formatCurrency } from '../utils/currency';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface Transaction {
   id: string;
@@ -55,6 +56,7 @@ interface MonthlyGoal {
 }
 
 const Expenses: React.FC = () => {
+  const { t, language } = useLanguage();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -158,7 +160,7 @@ const Expenses: React.FC = () => {
       setCategories(uniqueExpenseCategories.length > 0 ? uniqueExpenseCategories : defaultExpenseCategories);
       setCreditCards(creditCardsData);
 
-      const currentMonth = format(new Date(), 'MMMM', { locale: es });
+      const currentMonth = format(new Date(), 'MMMM', { locale: language === 'es' ? es : enUS });
       const currentYear = new Date().getFullYear();
       const goal = await window.electronAPI.getMonthlyGoal(currentMonth, currentYear, 'expense');
       
@@ -212,17 +214,17 @@ const Expenses: React.FC = () => {
     
     const amount = parseFloat(cleanNumberValue(formData.amount));
     if (isNaN(amount) || amount <= 0) {
-      alert('Por favor, ingresa un monto válido mayor a cero.');
+      alert(`${t.common.pleaseEnter} ${t.common.validAmount} ${t.common.greaterThanZero}.`);
       return;
     }
     
     if (!formData.description.trim()) {
-      alert('Por favor, ingresa una descripción.');
+      alert(`${t.common.pleaseEnter} una descripción.`);
       return;
     }
     
     if (!formData.category) {
-      alert('Por favor, selecciona una categoría.');
+      alert(`${t.common.pleaseSelect} ${t.common.category}.`);
       return;
     }
     
@@ -246,13 +248,13 @@ const Expenses: React.FC = () => {
       handleCloseForm();
     } catch (error) {
       console.error('Error saving transaction:', error);
-      alert('Error al guardar el gasto. Por favor, intenta de nuevo.');
+      alert(`${t.common.errorSaving} el gasto. ${t.common.pleaseEnter} intenta de nuevo.`);
     }
   };
 
   const handleQuickExpense = async (amount: number, description: string) => {
     if (isNaN(amount) || amount <= 0) {
-      alert('Por favor, ingresa un monto válido mayor a cero.');
+      alert(`${t.common.pleaseEnter} ${t.common.validAmount} ${t.common.greaterThanZero}.`);
       return;
     }
     
@@ -260,9 +262,9 @@ const Expenses: React.FC = () => {
       description,
       amount,
       type: 'expense' as const,
-      category: 'Gasto rápido',
+      category: t.common.quickExpense,
       date: format(new Date(), 'yyyy-MM-dd'),
-      notes: 'Gasto agregado desde acciones rápidas'
+      notes: t.expenses.additionalInfo
     };
 
     try {
@@ -271,7 +273,7 @@ const Expenses: React.FC = () => {
       setQuickExpenseAmount('');
     } catch (error) {
       console.error('Error saving quick expense:', error);
-      alert('Error al guardar el gasto rápido. Por favor, intenta de nuevo.');
+      alert(`${t.common.errorSaving} el gasto rápido. ${t.common.pleaseEnter} intenta de nuevo.`);
     }
   };
 
@@ -290,7 +292,7 @@ const Expenses: React.FC = () => {
     
     const targetAmount = parseFloat(cleanNumberValue(goalFormData.targetAmount));
     if (isNaN(targetAmount) || targetAmount <= 0) {
-      alert('Por favor, ingresa un monto objetivo válido mayor a cero.');
+      alert(`${t.common.pleaseEnter} un monto objetivo válido ${t.common.greaterThanZero}.`);
       return;
     }
     
@@ -330,7 +332,7 @@ const Expenses: React.FC = () => {
       setGoalFormData({ targetAmount: '', notes: '' });
     } catch (error) {
       console.error('Error saving monthly goal:', error);
-      alert('Error al guardar la meta mensual. Por favor, intenta de nuevo.');
+      alert(`${t.common.errorSaving} la meta mensual. ${t.common.pleaseEnter} intenta de nuevo.`);
     }
   };
 
@@ -408,7 +410,7 @@ const Expenses: React.FC = () => {
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando datos...</p>
+          <p className="mt-4 text-gray-600">{t.expenses.loadingData}</p>
         </div>
       </div>
     );
@@ -418,8 +420,8 @@ const Expenses: React.FC = () => {
     <div className="pt-8 pb-6 px-6 space-y-6 max-w-[90rem] mx-auto relative z-10">
       {/* Título de la sección */}
       <div className="mb-2">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Gastos</h1>
-        <p className="text-sm text-gray-600">Registra cada gasto, establece límites mensuales y mantén un control detallado de tus finanzas</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">{t.expenses.title}</h1>
+        <p className="text-sm text-gray-600">{t.expenses.subtitle}</p>
       </div>
 
       {/* Header con estadísticas principales */}
@@ -431,8 +433,8 @@ const Expenses: React.FC = () => {
                 <TrendingDown className="w-7 h-7 text-gray-600" />
               </div>
               <div>
-                <p className="text-base font-medium text-gray-600">Total acumulado</p>
-                <p className="text-xs text-gray-500">Historial completo</p>
+                <p className="text-base font-medium text-gray-600">{t.expenses.totalAccumulated}</p>
+                <p className="text-xs text-gray-500">{t.expenses.fullHistory}</p>
               </div>
             </div>
           </div>
@@ -446,8 +448,8 @@ const Expenses: React.FC = () => {
                 <Calendar className="w-7 h-7 text-gray-600" />
               </div>
               <div>
-                <p className="text-base font-medium text-gray-600">Mes actual</p>
-                <p className="text-xs text-gray-500">Gastos del período</p>
+                <p className="text-base font-medium text-gray-600">{t.expenses.currentMonth}</p>
+                <p className="text-xs text-gray-500">{t.expenses.periodExpenses}</p>
               </div>
             </div>
           </div>
@@ -461,8 +463,8 @@ const Expenses: React.FC = () => {
                 <Minus className="w-7 h-7 text-gray-600" />
               </div>
               <div>
-                <p className="text-base font-medium text-gray-600">Promedio</p>
-                <p className="text-xs text-gray-500">Por gasto</p>
+                <p className="text-base font-medium text-gray-600">{t.expenses.average}</p>
+                <p className="text-xs text-gray-500">{t.expenses.perExpense}</p>
               </div>
             </div>
           </div>
@@ -476,7 +478,7 @@ const Expenses: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           {/* Acciones Rápidas */}
           <div className="bg-white rounded-3xl px-5 pt-8 pb-5 shadow-sm border border-gray-200 transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg flex flex-col">
-            <h3 className="text-base font-semibold text-gray-900 mb-6">Acciones rápidas</h3>
+            <h3 className="text-base font-semibold text-gray-900 mb-6">{t.expenses.quickActions}</h3>
             <div className="space-y-2">
               <button 
                 onClick={() => setShowForm(true)}
@@ -486,7 +488,7 @@ const Expenses: React.FC = () => {
                   <Plus className="w-4 h-4 text-gray-600" />
                 </div>
                 <div className="text-left">
-                  <p className="text-xs font-medium text-gray-900">Nuevo gasto</p>
+                  <p className="text-xs font-medium text-gray-900">{t.expenses.newExpense}</p>
                 </div>
               </button>
               <button 
@@ -497,7 +499,7 @@ const Expenses: React.FC = () => {
                   <BookHeart className="w-4 h-4 text-gray-600" />
                 </div>
                 <div className="text-left">
-                  <p className="text-xs font-medium text-gray-900">Meta mensual</p>
+                  <p className="text-xs font-medium text-gray-900">{t.expenses.monthlyGoal}</p>
                   {monthlyGoal && (
                     <p className="text-xs text-gray-500">
                       {formatCurrency(monthlyGoal.currentAmount)} / {formatCurrency(monthlyGoal.targetAmount)}
@@ -515,7 +517,7 @@ const Expenses: React.FC = () => {
                   <div className="flex-1">
                     <input
                       type="text"
-                      placeholder="Monto del gasto rápido"
+                      placeholder={t.expenses.quickExpenseAmount}
                       value={quickExpenseAmount}
                       onChange={(e) => setQuickExpenseAmount(formatNumberInput(e.target.value))}
                       className="w-full text-xs bg-white border-none outline-none placeholder-gray-500"
@@ -524,10 +526,10 @@ const Expenses: React.FC = () => {
                 </div>
                 {quickExpenseAmount && (
                   <button 
-                    onClick={() => handleQuickExpense(parseFloat(cleanNumberValue(quickExpenseAmount)), 'Gasto rápido')}
+                    onClick={() => handleQuickExpense(parseFloat(cleanNumberValue(quickExpenseAmount)), t.common.quickExpense)}
                     className="w-full px-3 py-2 bg-gray-900 text-white text-xs rounded-xl hover:bg-gray-800 transition-colors"
                   >
-                    Agregar {formatCurrency(parseFloat(cleanNumberValue(quickExpenseAmount)))}
+                    {t.expenses.add} {formatCurrency(parseFloat(cleanNumberValue(quickExpenseAmount)))}
                   </button>
                 )}
               </div>
@@ -537,7 +539,7 @@ const Expenses: React.FC = () => {
           {/* Meta Mensual */}
           <div className="bg-white rounded-3xl p-7 shadow-sm border border-gray-200 transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-sm font-semibold text-gray-900">Meta mensual de gastos</h3>
+              <h3 className="text-sm font-semibold text-gray-900">{t.expenses.monthlyExpenseGoal}</h3>
               <button 
                 onClick={handleMonthlyGoal}
                 className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
@@ -551,17 +553,17 @@ const Expenses: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-2xl font-bold text-gray-900">{formatCurrency(monthlyGoal.currentAmount)}</p>
-                    <p className="text-xs text-gray-500">Acumulado del mes</p>
+                    <p className="text-xs text-gray-500">{t.expenses.accumulatedMonth}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-lg font-semibold text-gray-700">{formatCurrency(monthlyGoal.targetAmount)}</p>
-                    <p className="text-xs text-gray-500">Meta mensual</p>
+                    <p className="text-xs text-gray-500">{t.expenses.goalMonthly}</p>
                   </div>
                 </div>
                 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-gray-600">Progreso</span>
+                    <span className="text-gray-600">{t.expenses.progress}</span>
                     <span className="text-gray-500">{goalProgress.toFixed(1)}%</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-3">
@@ -573,7 +575,7 @@ const Expenses: React.FC = () => {
                 </div>
                 
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-500">Restante</span>
+                  <span className="text-gray-500">{t.expenses.remaining}</span>
                   <span className="font-medium text-gray-700">
                     {formatCurrency(Math.max(0, monthlyGoal.targetAmount - monthlyGoal.currentAmount))}
                   </span>
@@ -582,12 +584,13 @@ const Expenses: React.FC = () => {
             ) : (
               <div className="text-center py-8">
                 <BookHeart className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500 text-sm">No hay meta mensual establecida</p>
+                <p className="text-gray-500 text-sm mb-1">{t.expenses.defineObjective}</p>
+                <p className="text-xs text-gray-400">{t.expenses.maintainControl}</p>
                 <button 
                   onClick={handleMonthlyGoal}
-                  className="mt-3 px-4 py-2 bg-[#0f0f0f] text-white text-xs rounded-xl hover:bg-gray-800 transition-colors"
+                  className="mt-3 px-4 py-2 bg-gray-900 text-white text-xs rounded-xl hover:bg-gray-800 transition-colors"
                 >
-                  Establecer meta
+                  {t.expenses.setGoal}
                 </button>
               </div>
             )}
@@ -601,7 +604,7 @@ const Expenses: React.FC = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Buscar gastos..."
+                placeholder={t.expenses.searchExpenses}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
@@ -613,7 +616,7 @@ const Expenses: React.FC = () => {
                 onChange={(e) => setFilterCategory(e.target.value)}
                 className="px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
               >
-                <option value="all">Ver todas</option>
+                <option value="all">{t.expenses.viewAll}</option>
                 {categories.map(category => (
                   <option key={category.id} value={category.name}>
                     {category.name}
@@ -669,7 +672,7 @@ const Expenses: React.FC = () => {
                         -{formatCurrency(transaction.amount)}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {format(new Date(transaction.date), 'dd/MM/yyyy', { locale: es })}
+                        {format(new Date(transaction.date), 'dd/MM/yyyy', { locale: language === 'es' ? es : enUS })}
                       </p>
                     </div>
                     
@@ -693,8 +696,8 @@ const Expenses: React.FC = () => {
             ) : (
               <div className="text-center py-8">
                 <TrendingDown className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500 mb-2">Comienza registrando tu primer gasto</p>
-                <p className="text-xs text-gray-400">Usa el botón "Nuevo gasto" o el gasto rápido para empezar</p>
+                <p className="text-gray-500 mb-2">{t.expenses.startRegistering}</p>
+                <p className="text-xs text-gray-400">{t.expenses.useNewExpense}</p>
               </div>
             )}
           </div>
@@ -707,7 +710,7 @@ const Expenses: React.FC = () => {
           <div className="bg-white rounded-3xl p-6 w-full max-w-md mx-4 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-900">
-                Meta mensual de gastos
+                {t.expenses.expenseGoal}
               </h2>
               <button
                 onClick={handleCloseGoalModal}
@@ -720,7 +723,7 @@ const Expenses: React.FC = () => {
             {monthlyGoal ? (
               <div className="mb-6 p-4 bg-gray-50 rounded-2xl">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700">Progreso actual</span>
+                  <span className="text-sm font-medium text-gray-700">{t.expenses.currentProgress}</span>
                   <span className="text-sm text-gray-500">
                     {formatCurrency(monthlyGoal.currentAmount)} / {formatCurrency(monthlyGoal.targetAmount)}
                   </span>
@@ -732,18 +735,19 @@ const Expenses: React.FC = () => {
                   ></div>
                 </div>
                 <p className="text-xs text-gray-500 mt-2">
-                  {goalProgress.toFixed(1)}% completado
+                  {goalProgress.toFixed(1)}% {t.expenses.completed}
                 </p>
               </div>
             ) : (
               <div className="text-center py-8">
                 <BookHeart className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500 text-sm">No hay meta mensual establecida</p>
+                <p className="text-gray-500 text-sm mb-1">{t.expenses.defineObjective}</p>
+                <p className="text-xs text-gray-400">{t.expenses.maintainControl}</p>
                 <button 
                   onClick={handleMonthlyGoal}
-                  className="mt-3 px-4 py-2 bg-[#0f0f0f] text-white text-xs rounded-xl hover:bg-gray-800 transition-colors"
+                  className="mt-3 px-4 py-2 bg-gray-900 text-white text-xs rounded-xl hover:bg-gray-800 transition-colors"
                 >
-                  Establecer meta
+                  {t.expenses.setGoal}
                 </button>
               </div>
             )}
@@ -751,8 +755,8 @@ const Expenses: React.FC = () => {
             <form onSubmit={handleGoalSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Meta de gastos mensual
-                  <span className="text-xs text-gray-500 ml-1">(límite máximo)</span>
+                  {t.expenses.expenseGoal}
+                  <span className="text-xs text-gray-500 ml-1">{t.expenses.maximumLimit}</span>
                 </label>
                 <input
                   type="text"
@@ -760,7 +764,7 @@ const Expenses: React.FC = () => {
                     value={goalFormData.targetAmount}
                     onChange={(e) => setGoalFormData({...goalFormData, targetAmount: formatNumberInput(e.target.value)})}
                     className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                  placeholder="0.00 (solo números)"
+                  placeholder={t.common.numbersOnly}
                 />
               </div>
 
@@ -773,7 +777,7 @@ const Expenses: React.FC = () => {
                     onChange={(e) => setGoalFormData({...goalFormData, notes: e.target.value})}
                     className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                   rows={3}
-                  placeholder="Notas sobre tu meta mensual..."
+                  placeholder={t.expenses.additionalInfo}
                 />
               </div>
 
@@ -783,13 +787,13 @@ const Expenses: React.FC = () => {
                   onClick={handleCloseGoalModal}
                   className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
                 >
-                  Cancelar
+                  {t.expenses.cancel}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 px-4 py-2 bg-[#0f0f0f] text-white rounded-xl hover:bg-gray-800 transition-colors"
                 >
-                  Guardar Meta
+                  {t.expenses.save} {t.expenses.monthlyGoal}
                 </button>
               </div>
             </form>
@@ -802,14 +806,14 @@ const Expenses: React.FC = () => {
         <div className="fixed -top-1 -left-1 -right-1 -bottom-1 w-[calc(100%+2px)] h-[calc(100%+2px)] bg-[#0f0f0f] bg-opacity-50 flex items-center justify-center z-[9999] m-0 p-0" style={{ margin: 0, padding: 0 }}>
           <div className="bg-white rounded-3xl p-6 w-full max-w-md mx-4 shadow-2xl">
             <h2 className="text-xl font-bold text-gray-900 mb-4">
-              {editingTransaction ? 'Editar gasto' : 'Nuevo gasto'}
+              {editingTransaction ? t.expenses.editExpense : t.expenses.newExpenseForm}
             </h2>
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Descripción
-                  <span className="text-xs text-gray-500 ml-1">(en qué gastaste)</span>
+                  {t.expenses.description}
+                  <span className="text-xs text-gray-500 ml-1">{t.expenses.whatSpent}</span>
                 </label>
                 <input
                   type="text"
@@ -817,14 +821,14 @@ const Expenses: React.FC = () => {
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                  placeholder="Ej: Compra en supermercado, cena en restaurante, viaje en taxi..."
+                  placeholder={`${t.common.example} ${language === 'es' ? 'Compra en supermercado, cena en restaurante, viaje en taxi...' : 'Supermarket purchase, restaurant dinner, taxi ride...'}`}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Monto
-                  <span className="text-xs text-gray-500 ml-1">(cantidad gastada)</span>
+                  {t.expenses.amount}
+                  <span className="text-xs text-gray-500 ml-1">{t.expenses.amountSpent}</span>
                 </label>
                 <input
                   type="text"
@@ -832,13 +836,13 @@ const Expenses: React.FC = () => {
                   value={formData.amount}
                   onChange={(e) => setFormData({...formData, amount: formatNumberInput(e.target.value)})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                  placeholder="0.00 (solo números)"
+                  placeholder={t.common.numbersOnly}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Categoría
+                  {t.expenses.category}
                 </label>
                 <select
                   required
@@ -846,7 +850,7 @@ const Expenses: React.FC = () => {
                   onChange={(e) => setFormData({...formData, category: e.target.value})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                 >
-                  <option value="">Seleccionar categoría</option>
+                  <option value="">{t.expenses.selectCategory}</option>
                   {categories.map(category => (
                     <option key={category.id} value={category.name}>
                       {category.name}
@@ -857,7 +861,7 @@ const Expenses: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Fecha
+                  {t.expenses.date}
                 </label>
                 <input
                   type="date"
@@ -877,7 +881,7 @@ const Expenses: React.FC = () => {
                   onChange={(e) => setFormData({...formData, notes: e.target.value})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                   rows={3}
-                  placeholder="Información adicional (opcional)"
+                  placeholder={t.expenses.additionalInfo}
                 />
               </div>
 
@@ -907,7 +911,7 @@ const Expenses: React.FC = () => {
                         onChange={(e) => setFormData({...formData, creditCardId: e.target.value})}
                         className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                       >
-                        <option value="">Seleccionar tarjeta</option>
+                        <option value="">{t.creditCards.selectCard}</option>
                         {creditCards.map(card => (
                           <option key={card.id} value={card.id}>
                             {card.name}
@@ -951,13 +955,13 @@ const Expenses: React.FC = () => {
                   onClick={handleCloseForm}
                   className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
                 >
-                  Cancelar
+                  {t.expenses.cancel}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 px-4 py-2 bg-[#0f0f0f] text-white rounded-xl hover:bg-gray-800 transition-colors"
                 >
-                  {editingTransaction ? 'Actualizar' : 'Guardar'}
+                  {editingTransaction ? t.expenses.update : t.expenses.save}
                 </button>
               </div>
             </form>
@@ -971,7 +975,7 @@ const Expenses: React.FC = () => {
           <div className="bg-white rounded-3xl p-6 w-full max-w-md mx-4 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">
-                Confirmar eliminación
+                {t.expenses.confirmDelete}
               </h2>
               <button
                 onClick={cancelDelete}
@@ -1015,7 +1019,7 @@ const Expenses: React.FC = () => {
             </div>
 
             <p className="text-gray-700 mb-6">
-              Esta acción eliminará permanentemente el gasto. ¿Deseas continuar?
+              {t.expenses.deletePermanently}
             </p>
 
             <div className="flex space-x-3">
@@ -1024,14 +1028,14 @@ const Expenses: React.FC = () => {
                 onClick={cancelDelete}
                 className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
               >
-                Cancelar
+                {t.expenses.cancel}
               </button>
               <button
                 type="button"
                 onClick={confirmDelete}
                 className="flex-1 px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors"
               >
-                Eliminar
+                {t.expenses.delete}
               </button>
             </div>
           </div>

@@ -13,8 +13,9 @@ import {
   Check
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { es, enUS } from 'date-fns/locale';
 import { formatCurrency } from '../utils/currency';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface CreditCard {
   id: string;
@@ -38,6 +39,7 @@ interface Transaction {
 }
 
 const CreditCards: React.FC = () => {
+  const { t, language } = useLanguage();
   const [creditCards, setCreditCards] = useState<CreditCard[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -121,18 +123,18 @@ const CreditCards: React.FC = () => {
     e.preventDefault();
     
     if (!cardFormData.name.trim()) {
-      alert('Por favor, ingresa un nombre para la tarjeta.');
+      alert(`${t.common.pleaseEnter} un nombre para la tarjeta.`);
       return;
     }
     
     if (!cardFormData.bank.trim()) {
-      alert('Por favor, ingresa el nombre del banco.');
+      alert(`${t.common.pleaseEnter} el nombre del banco.`);
       return;
     }
     
     const creditLimit = parseFloat(cleanNumberValue(cardFormData.creditLimit));
     if (isNaN(creditLimit) || creditLimit <= 0) {
-      alert('Por favor, ingresa un límite de crédito válido mayor a cero.');
+      alert(`${t.common.pleaseEnter} un límite de crédito válido ${t.common.greaterThanZero}.`);
       return;
     }
     
@@ -152,7 +154,7 @@ const CreditCards: React.FC = () => {
       handleCloseCardForm();
     } catch (error) {
       console.error('Error saving card:', error);
-      alert('Error al guardar la tarjeta. Por favor, intenta de nuevo.');
+      alert(`${t.common.errorSaving} la tarjeta. ${t.common.pleaseEnter} intenta de nuevo.`);
     }
   };
 
@@ -219,27 +221,27 @@ const CreditCards: React.FC = () => {
     
     // Validaciones
     if (!transactionFormData.description.trim()) {
-      alert('Por favor, ingresa una descripción para el gasto.');
+      alert(`${t.common.pleaseEnter} una descripción para el gasto.`);
       return;
     }
     
     if (!transactionFormData.amount || parseFloat(cleanNumberValue(transactionFormData.amount)) <= 0) {
-      alert('Por favor, ingresa un monto válido.');
+      alert(`${t.common.pleaseEnter} ${t.common.validAmount}.`);
       return;
     }
     
     if (!transactionFormData.category) {
-      alert('Por favor, selecciona una categoría.');
+      alert(`${t.common.pleaseSelect} ${t.common.category}.`);
       return;
     }
     
     if (!transactionFormData.creditCardId) {
-      alert('Por favor, selecciona una tarjeta de crédito.');
+      alert(`${t.common.pleaseSelect} una tarjeta de crédito.`);
       return;
     }
     
     if (!transactionFormData.totalInstallments || transactionFormData.totalInstallments < 1) {
-      alert('Por favor, ingresa un número válido de cuotas.');
+      alert(`${t.common.pleaseEnter} un número válido de cuotas.`);
       return;
     }
     
@@ -266,7 +268,7 @@ const CreditCards: React.FC = () => {
       handleCloseTransactionForm();
     } catch (error) {
       console.error('Error saving transaction:', error);
-      alert('Error al guardar la transacción. Por favor, intenta de nuevo.');
+      alert(`${t.common.errorSaving} la transacción. ${t.common.pleaseEnter} intenta de nuevo.`);
     }
   };
 
@@ -398,7 +400,7 @@ const CreditCards: React.FC = () => {
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando datos...</p>
+          <p className="mt-4 text-gray-600">{t.creditCards.loadingData}</p>
         </div>
       </div>
     );
@@ -408,8 +410,8 @@ const CreditCards: React.FC = () => {
     <div className="pt-8 pb-6 px-6 space-y-6 max-w-[90rem] mx-auto relative z-10">
       {/* Título de la sección */}
       <div className="mb-2">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Tarjetas</h1>
-        <p className="text-sm text-gray-600">Gestiona tus tarjetas, registra gastos en cuotas y mantén un seguimiento de tus deudas pendientes</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">{t.creditCards.title}</h1>
+        <p className="text-sm text-gray-600">{t.creditCards.subtitle}</p>
       </div>
 
       {/* Header con estadísticas principales */}
@@ -421,8 +423,8 @@ const CreditCards: React.FC = () => {
                 <CreditCard className="w-7 h-7 text-gray-600" />
               </div>
               <div>
-                <p className="text-base font-medium text-gray-600">Deuda acumulada</p>
-                <p className="text-xs text-gray-500">Total pendiente</p>
+                <p className="text-base font-medium text-gray-600">{t.creditCards.accumulatedDebt}</p>
+                <p className="text-xs text-gray-500">{t.creditCards.totalPending}</p>
               </div>
             </div>
           </div>
@@ -436,8 +438,8 @@ const CreditCards: React.FC = () => {
                 <DollarSign className="w-7 h-7 text-gray-600" />
               </div>
               <div>
-                <p className="text-base font-medium text-gray-600">Vencimiento mensual</p>
-                <p className="text-xs text-gray-500">Pago del período</p>
+                <p className="text-base font-medium text-gray-600">{t.creditCards.monthlyDue}</p>
+                <p className="text-xs text-gray-500">{t.creditCards.periodPayment}</p>
               </div>
             </div>
           </div>
@@ -453,8 +455,8 @@ const CreditCards: React.FC = () => {
                 <Clock className="w-7 h-7 text-gray-600" />
               </div>
               <div>
-                <p className="text-base font-medium text-gray-600">Cuotas restantes</p>
-                <p className="text-xs text-gray-500">Pendiente de pago</p>
+                <p className="text-base font-medium text-gray-600">{t.creditCards.remainingInstallments}</p>
+                <p className="text-xs text-gray-500">{t.creditCards.pendingPayment}</p>
               </div>
             </div>
           </div>
@@ -468,7 +470,7 @@ const CreditCards: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Acciones Rápidas */}
           <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-200 transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg">
-            <h3 className="text-base font-semibold text-gray-900 mb-3">Acciones rápidas</h3>
+            <h3 className="text-base font-semibold text-gray-900 mb-3">{t.creditCards.quickActions}</h3>
             <div className="space-y-2">
               <button 
                 onClick={() => setShowCardForm(true)}
@@ -478,7 +480,7 @@ const CreditCards: React.FC = () => {
                   <Plus className="w-4 h-4 text-gray-600" />
                 </div>
                 <div className="text-left">
-                  <p className="text-xs font-medium text-gray-900">Nueva tarjeta</p>
+                  <p className="text-xs font-medium text-gray-900">{t.creditCards.newCard}</p>
                 </div>
               </button>
               <button 
@@ -489,7 +491,7 @@ const CreditCards: React.FC = () => {
                   <CreditCard className="w-4 h-4 text-gray-600" />
                 </div>
                 <div className="text-left">
-                  <p className="text-xs font-medium text-gray-900">Nuevo gasto</p>
+                  <p className="text-xs font-medium text-gray-900">{t.creditCards.newExpense}</p>
                 </div>
               </button>
               <button 
@@ -500,7 +502,7 @@ const CreditCards: React.FC = () => {
                   <DollarSign className="w-4 h-4 text-gray-600" />
                 </div>
                 <div className="text-left">
-                  <p className="text-xs font-medium text-gray-900">Gasto fijo</p>
+                  <p className="text-xs font-medium text-gray-900">{t.creditCards.fixedExpense}</p>
                 </div>
               </button>
             </div>
@@ -509,8 +511,8 @@ const CreditCards: React.FC = () => {
           {/* Tarjetas de Crédito */}
           <div className="lg:col-span-2 bg-white rounded-3xl p-6 shadow-sm border border-gray-200 transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-gray-900">Mis tarjetas</h3>
-              <p className="text-xs text-gray-500">{creditCards.length} tarjetas</p>
+              <h3 className="text-sm font-semibold text-gray-900">{t.creditCards.myCards}</h3>
+              <p className="text-xs text-gray-500">{creditCards.length} {t.creditCards.cards}</p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -546,21 +548,21 @@ const CreditCards: React.FC = () => {
                   
                   <div className="space-y-2 text-xs">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Límite:</span>
+                      <span className="text-gray-600">{t.creditCards.limit}:</span>
                       <span className="font-medium">{formatCurrency(card.creditLimit)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Saldo:</span>
+                      <span className="text-gray-600">{t.creditCards.balance}:</span>
                       <span className="font-medium text-gray-700">{formatCurrency(currentBalance)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Disponible:</span>
+                      <span className="text-gray-600">{t.creditCards.available}:</span>
                       <span className="font-medium text-gray-700">
                         {formatCurrency(card.creditLimit - currentBalance)}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Utilización:</span>
+                      <span className="text-gray-600">{t.creditCards.utilization}:</span>
                       <span className="font-medium text-gray-700">
                         {((currentBalance / card.creditLimit) * 100).toFixed(1)}%
                       </span>
@@ -576,9 +578,9 @@ const CreditCards: React.FC = () => {
         {/* Fila 3: Gastos Simples */}
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200 transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-gray-900">Gastos simples</h3>
+            <h3 className="text-sm font-semibold text-gray-900">{t.creditCards.simpleExpenses}</h3>
             <p className="text-xs text-gray-500">
-              {filteredTransactions.filter(t => t.creditCardId && (!t.isFixedExpense) && (t.totalInstallments === 1 || !t.totalInstallments) && t.category !== 'Saldo Inicial').length} gastos
+              {filteredTransactions.filter(t => t.creditCardId && (!t.isFixedExpense) && (t.totalInstallments === 1 || !t.totalInstallments) && t.category !== 'Saldo Inicial').length} {t.creditCards.expenses}
             </p>
           </div>
 
@@ -609,14 +611,14 @@ const CreditCards: React.FC = () => {
                         <button
                           onClick={() => handleEditFixedTransaction(transaction)}
                           className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
-                          title="Editar gasto"
+                          title={t.creditCards.editExpense}
                         >
                           <Edit className="w-3 h-3" />
                         </button>
                         <button
                           onClick={() => handleDeleteFixedTransaction(transaction)}
                           className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
-                          title="Eliminar gasto"
+                          title={t.creditCards.delete}
                         >
                           <Trash2 className="w-3 h-3" />
                         </button>
@@ -632,7 +634,7 @@ const CreditCards: React.FC = () => {
 
                     <div className="flex items-center justify-between">
                       <div className="text-xs text-gray-500">
-                        {format(new Date(transaction.date), 'dd/MM/yyyy', { locale: es })}
+                        {format(new Date(transaction.date), 'dd/MM/yyyy', { locale: language === 'es' ? es : enUS })}
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-semibold text-gray-900">{formatCurrency(transaction.amount)}</p>
@@ -647,8 +649,8 @@ const CreditCards: React.FC = () => {
           {filteredTransactions.filter(t => t.creditCardId && (!t.isFixedExpense) && (t.totalInstallments === 1 || !t.totalInstallments) && t.category !== 'Saldo Inicial').length === 0 && (
             <div className="text-center py-8">
               <DollarSign className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 mb-2">No hay gastos registrados</p>
-              <p className="text-xs text-gray-400">Los gastos de una sola cuota aparecerán aquí. Usa "Nuevo gasto" para agregar uno</p>
+              <p className="text-gray-500 mb-2">{t.creditCards.noExpenses}</p>
+              <p className="text-xs text-gray-400">{t.creditCards.singleInstallment}</p>
             </div>
           )}
         </div>
@@ -656,9 +658,9 @@ const CreditCards: React.FC = () => {
         {/* Fila 4: Gastos Fijos */}
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200 transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-gray-900">Gastos fijos</h3>
+            <h3 className="text-sm font-semibold text-gray-900">{t.creditCards.fixedExpenses}</h3>
             <p className="text-xs text-gray-500">
-              {filteredTransactions.filter(t => t.creditCardId && t.isFixedExpense && t.category !== 'Saldo Inicial').length} gastos
+              {filteredTransactions.filter(t => t.creditCardId && t.isFixedExpense && t.category !== 'Saldo Inicial').length} {t.creditCards.expenses}
             </p>
           </div>
 
@@ -689,14 +691,14 @@ const CreditCards: React.FC = () => {
                         <button
                           onClick={() => handleEditFixedTransaction(transaction)}
                           className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
-                          title="Editar gasto"
+                          title={t.creditCards.editExpense}
                         >
                           <Edit className="w-3 h-3" />
                         </button>
                         <button
                           onClick={() => handleDeleteFixedTransaction(transaction)}
                           className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
-                          title="Eliminar gasto"
+                          title={t.creditCards.delete}
                         >
                           <Trash2 className="w-3 h-3" />
                         </button>
@@ -712,7 +714,7 @@ const CreditCards: React.FC = () => {
 
                     <div className="flex items-center justify-between">
                       <div className="text-xs text-gray-500">
-                        {format(new Date(transaction.date), 'dd/MM/yyyy', { locale: es })}
+                        {format(new Date(transaction.date), 'dd/MM/yyyy', { locale: language === 'es' ? es : enUS })}
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-semibold text-gray-900">{formatCurrency(transaction.amount)}</p>
@@ -727,8 +729,8 @@ const CreditCards: React.FC = () => {
           {filteredTransactions.filter(t => t.creditCardId && t.isFixedExpense && t.category !== 'Saldo Inicial').length === 0 && (
             <div className="text-center py-8">
               <DollarSign className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 mb-2">No hay gastos fijos registrados</p>
-              <p className="text-xs text-gray-400">Los gastos recurrentes (suscripciones, servicios) aparecerán aquí</p>
+              <p className="text-gray-500 mb-2">{t.creditCards.noFixedExpenses}</p>
+              <p className="text-xs text-gray-400">{t.creditCards.recurringExpenses}</p>
             </div>
           )}
         </div>
@@ -736,9 +738,9 @@ const CreditCards: React.FC = () => {
         {/* Fila 5: Gastos en Cuotas */}
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200 transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-gray-900">Gastos en cuotas</h3>
+            <h3 className="text-sm font-semibold text-gray-900">{t.creditCards.installmentExpenses}</h3>
             <p className="text-xs text-gray-500">
-              {filteredTransactions.filter(t => t.creditCardId && (!t.isFixedExpense) && t.totalInstallments && t.totalInstallments > 1).length} gastos
+              {filteredTransactions.filter(t => t.creditCardId && (!t.isFixedExpense) && t.totalInstallments && t.totalInstallments > 1).length} {t.creditCards.expenses}
             </p>
           </div>
           <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -746,7 +748,7 @@ const CreditCards: React.FC = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Buscar gastos en cuotas..."
+                placeholder={t.creditCards.searchInstallments}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
@@ -758,7 +760,7 @@ const CreditCards: React.FC = () => {
                 onChange={(e) => setSelectedCard(e.target.value)}
                 className="px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
               >
-                <option value="all">Ver todas</option>
+                <option value="all">{t.creditCards.viewAll}</option>
                 {creditCards.map(card => (
                   <option key={card.id} value={card.id}>
                     {card.name}
@@ -812,7 +814,7 @@ const CreditCards: React.FC = () => {
                     {/* Barra de Progreso */}
                     <div className="mb-3">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs text-gray-600">Progreso de cuotas</span>
+                        <span className="text-xs text-gray-600">{t.creditCards.installmentProgress}</span>
                         <span className="text-xs font-medium text-gray-700">
                           {paidInstallments}/{totalInstallments}
                         </span>
@@ -828,19 +830,19 @@ const CreditCards: React.FC = () => {
                     {/* Montos */}
                     <div className="space-y-1 mb-4">
                       <div className="flex justify-between">
-                        <span className="text-xs text-gray-600">Total:</span>
+                        <span className="text-xs text-gray-600">{t.creditCards.total}:</span>
                         <span className="text-xs font-medium text-gray-900">
                           {formatCurrency(transaction.amount)}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-xs text-gray-600">Por cuota:</span>
+                        <span className="text-xs text-gray-600">{t.creditCards.perInstallment}:</span>
                         <span className="text-xs font-medium text-gray-700">
                           {formatCurrency(installmentAmount)}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-xs text-gray-600">Restante:</span>
+                        <span className="text-xs text-gray-600">{t.creditCards.remaining}:</span>
                         <span className="text-xs font-medium text-gray-700">
                           {formatCurrency(remainingAmount)}
                         </span>
@@ -850,7 +852,7 @@ const CreditCards: React.FC = () => {
                     {/* Fecha */}
                     <div className="mb-4">
                       <p className="text-xs text-gray-500">
-                        {format(new Date(transaction.date), 'dd/MM/yyyy', { locale: es })}
+                        {format(new Date(transaction.date), 'dd/MM/yyyy', { locale: language === 'es' ? es : enUS })}
                       </p>
                     </div>
 
@@ -863,24 +865,24 @@ const CreditCards: React.FC = () => {
                             className="flex-1 flex items-center justify-center space-x-1.5 px-3 py-2 bg-[#0f0f0f] text-white rounded-xl hover:bg-gray-800 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md font-medium text-sm"
                           >
                             <Check className="w-4 h-4" />
-                            <span>Pagar cuota</span>
+                            <span>{t.creditCards.payInstallment}</span>
                           </button>
                           
                           {paidInstallments > 0 && (
                             <button
                               onClick={() => handleUpdateInstallment(transaction.id, paidInstallments - 1)}
                               className="flex-1 flex items-center justify-center space-x-1.5 px-3 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md font-medium border border-gray-200 text-sm"
-                              title="Deshacer pago de cuota"
+                              title={t.creditCards.undoPayment}
                             >
                               <ArrowLeft className="w-4 h-4" />
-                              <span>Retroceder cuota</span>
+                              <span>{t.creditCards.undoPayment}</span>
                             </button>
                           )}
                         </>
                       ) : (
                         <div className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gray-50 rounded-2xl border border-gray-200">
                           <CheckCircle className="w-5 h-5 text-gray-600" />
-                          <span className="text-sm font-medium text-gray-700">Completado</span>
+                          <span className="text-sm font-medium text-gray-700">{t.creditCards.completed}</span>
                         </div>
                       )}
                     </div>
@@ -891,7 +893,7 @@ const CreditCards: React.FC = () => {
                         <div className="flex items-center space-x-2">
                           <Clock className="w-4 h-4 text-gray-600" />
                           <span className="text-xs font-medium text-gray-700">
-                            {remainingInstallments} cuota{remainingInstallments > 1 ? 's' : ''} pendiente{remainingInstallments > 1 ? 's' : ''}
+                            {remainingInstallments} {t.creditCards.pendingInstallments}
                           </span>
                         </div>
                       </div>
@@ -902,7 +904,7 @@ const CreditCards: React.FC = () => {
                       <div className="mt-3 p-2 bg-green-50 border border-green-200 rounded-xl">
                         <div className="flex items-center space-x-2">
                           <CheckCircle className="w-4 h-4 text-green-600" />
-                          <span className="text-xs font-medium text-green-700">¡Pago completado!</span>
+                          <span className="text-xs font-medium text-green-700">{t.creditCards.paymentCompleted}</span>
                         </div>
                       </div>
                     )}
@@ -915,8 +917,8 @@ const CreditCards: React.FC = () => {
           {filteredTransactions.filter(t => t.creditCardId && (!t.isFixedExpense) && t.totalInstallments && t.totalInstallments > 1).length === 0 && (
             <div className="text-center py-8">
               <CreditCard className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 mb-2">No hay gastos en cuotas</p>
-              <p className="text-xs text-gray-400">Los gastos a plazos (compras grandes) aparecerán aquí. Puedes pagar cuotas individualmente</p>
+              <p className="text-gray-500 mb-2">{t.creditCards.noInstallments}</p>
+              <p className="text-xs text-gray-400">{t.creditCards.largePurchases}</p>
             </div>
           )}
         </div>
@@ -928,7 +930,7 @@ const CreditCards: React.FC = () => {
           <div className="bg-white rounded-3xl p-6 w-full max-w-md mx-4 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">
-                {editingCard ? 'Editar tarjeta' : 'Nueva tarjeta'}
+                {editingCard ? t.creditCards.editCard : t.creditCards.newCardForm}
               </h2>
               <button
                 onClick={handleCloseCardForm}
@@ -941,7 +943,7 @@ const CreditCards: React.FC = () => {
             <form onSubmit={handleCardSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nombre de la tarjeta
+                  {t.creditCards.cardName}
                 </label>
                 <input
                   type="text"
@@ -949,13 +951,13 @@ const CreditCards: React.FC = () => {
                   value={cardFormData.name}
                   onChange={(e) => setCardFormData({...cardFormData, name: e.target.value})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                  placeholder="Ej: Visa Clásica"
+                  placeholder={`${t.common.example} ${language === 'es' ? 'Visa Clásica' : 'Classic Visa'}`}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Banco
+                  {t.creditCards.bank}
                 </label>
                 <input
                   type="text"
@@ -963,14 +965,14 @@ const CreditCards: React.FC = () => {
                   value={cardFormData.bank}
                   onChange={(e) => setCardFormData({...cardFormData, bank: e.target.value})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                  placeholder="Ej: Banco Santander"
+                  placeholder={`${t.common.example} ${language === 'es' ? 'Banco Santander' : 'Santander Bank'}`}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Límite de crédito
-                  <span className="text-xs text-gray-500 ml-1">(monto máximo disponible)</span>
+                  {t.creditCards.creditLimit}
+                  <span className="text-xs text-gray-500 ml-1">{t.creditCards.maximumAvailable}</span>
                 </label>
                 <input
                   type="text"
@@ -978,7 +980,7 @@ const CreditCards: React.FC = () => {
                   value={cardFormData.creditLimit}
                   onChange={(e) => setCardFormData({...cardFormData, creditLimit: formatNumberInput(e.target.value)})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                  placeholder="0.00 (solo números)"
+                  placeholder={t.common.numbersOnly}
                 />
               </div>
 
@@ -988,13 +990,13 @@ const CreditCards: React.FC = () => {
                   onClick={handleCloseCardForm}
                   className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
                 >
-                  Cancelar
+                  {t.creditCards.cancel}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 px-4 py-2 bg-[#0f0f0f] text-white rounded-xl hover:bg-gray-800 transition-colors"
                 >
-                  {editingCard ? 'Actualizar' : 'Guardar'}
+                  {editingCard ? t.creditCards.update : t.creditCards.save}
                 </button>
               </div>
             </form>
@@ -1008,7 +1010,7 @@ const CreditCards: React.FC = () => {
           <div className="bg-white rounded-3xl p-6 w-full max-w-md mx-4 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">
-                Confirmar eliminación
+                {t.creditCards.confirmDelete}
               </h2>
               <button
                 onClick={cancelDeleteCard}
@@ -1031,7 +1033,7 @@ const CreditCards: React.FC = () => {
             </div>
 
             <p className="text-gray-700 mb-6">
-              Esta acción eliminará permanentemente la tarjeta y sus datos. ¿Deseas continuar?
+              {t.creditCards.deletePermanently}
             </p>
 
             <div className="flex space-x-3">
@@ -1040,14 +1042,14 @@ const CreditCards: React.FC = () => {
                 onClick={cancelDeleteCard}
                 className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
               >
-                Cancelar
+                {t.creditCards.cancel}
               </button>
               <button
                 type="button"
                 onClick={confirmDeleteCard}
                 className="flex-1 px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors"
               >
-                Eliminar
+                {t.creditCards.delete}
               </button>
             </div>
           </div>
@@ -1060,7 +1062,7 @@ const CreditCards: React.FC = () => {
           <div className="bg-white rounded-3xl p-6 w-full max-w-md mx-4 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">
-                Confirmar eliminación
+                {t.creditCards.confirmDelete}
               </h2>
               <button
                 onClick={cancelDeleteFixedTransaction}
@@ -1098,14 +1100,14 @@ const CreditCards: React.FC = () => {
                 onClick={cancelDeleteFixedTransaction}
                 className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
               >
-                Cancelar
+                {t.creditCards.cancel}
               </button>
               <button
                 type="button"
                 onClick={confirmDeleteFixedTransaction}
                 className="flex-1 px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors"
               >
-                Eliminar
+                {t.creditCards.delete}
               </button>
             </div>
           </div>
@@ -1118,7 +1120,7 @@ const CreditCards: React.FC = () => {
           <div className="bg-white rounded-3xl p-6 w-full max-w-md mx-4 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">
-                {editingTransaction ? (isFixedExpense ? 'Editar gasto fijo' : 'Editar gasto') : (isFixedExpense ? 'Nuevo gasto fijo' : 'Nuevo gasto con tarjeta')}
+                {editingTransaction ? (isFixedExpense ? t.creditCards.editFixedExpense : t.creditCards.editExpense) : (isFixedExpense ? t.creditCards.newFixedExpense : t.creditCards.newExpenseWithCard)}
               </h2>
               <button
                 onClick={handleCloseTransactionForm}
@@ -1131,8 +1133,8 @@ const CreditCards: React.FC = () => {
             <form onSubmit={handleTransactionSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Descripción
-                  <span className="text-xs text-gray-500 ml-1">(qué compraste o pagaste)</span>
+                  {t.creditCards.description}
+                  <span className="text-xs text-gray-500 ml-1">{t.creditCards.whatBought}</span>
                 </label>
                 <input
                   type="text"
@@ -1140,14 +1142,14 @@ const CreditCards: React.FC = () => {
                   value={transactionFormData.description}
                   onChange={(e) => setTransactionFormData({...transactionFormData, description: e.target.value})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                  placeholder="Ej: Compra de electrodoméstico, pago de suscripción mensual..."
+                  placeholder={`${t.common.example} ${language === 'es' ? 'Compra de electrodoméstico, pago de suscripción mensual...' : 'Appliance purchase, monthly subscription payment...'}`}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Monto
-                  <span className="text-xs text-gray-500 ml-1">(total del gasto)</span>
+                  {t.creditCards.amount}
+                  <span className="text-xs text-gray-500 ml-1">{t.creditCards.totalExpense}</span>
                 </label>
                 <input
                   type="text"
@@ -1155,13 +1157,13 @@ const CreditCards: React.FC = () => {
                   value={transactionFormData.amount}
                   onChange={(e) => setTransactionFormData({...transactionFormData, amount: formatNumberInput(e.target.value)})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                  placeholder="0.00 (solo números)"
+                  placeholder={t.common.numbersOnly}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Categoría
+                  {t.creditCards.category}
                 </label>
                 <select
                   required
@@ -1169,20 +1171,20 @@ const CreditCards: React.FC = () => {
                   onChange={(e) => setTransactionFormData({...transactionFormData, category: e.target.value})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                 >
-                  <option value="">Seleccionar categoría</option>
-                  <option value="Electrónicos">Electrónicos</option>
-                  <option value="Ropa">Ropa</option>
-                  <option value="Alimentación">Alimentación</option>
-                  <option value="Transporte">Transporte</option>
-                  <option value="Entretenimiento">Entretenimiento</option>
-                  <option value="Compras">Compras</option>
-                  <option value="Otros">Otros</option>
+                  <option value="">{t.creditCards.selectCategory}</option>
+                  <option value={t.common.electronics}>{t.common.electronics}</option>
+                  <option value={t.common.clothing}>{t.common.clothing}</option>
+                  <option value={t.common.food}>{t.common.food}</option>
+                  <option value={t.common.transportation}>{t.common.transportation}</option>
+                  <option value={t.common.entertainment}>{t.common.entertainment}</option>
+                  <option value={t.common.shopping}>{t.common.shopping}</option>
+                  <option value={t.common.other}>{t.common.other}</option>
                 </select>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tarjeta de crédito
+                  {t.creditCards.creditCard}
                 </label>
                 <select
                   required
@@ -1190,7 +1192,7 @@ const CreditCards: React.FC = () => {
                   onChange={(e) => setTransactionFormData({...transactionFormData, creditCardId: e.target.value})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                 >
-                  <option value="">Seleccionar tarjeta</option>
+                  <option value="">{t.creditCards.selectCard}</option>
                   {creditCards.map(card => (
                     <option key={card.id} value={card.id}>
                       {card.name} - {card.bank}
@@ -1201,8 +1203,8 @@ const CreditCards: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Total de cuotas
-                  <span className="text-xs text-gray-500 ml-1">(número de pagos mensuales)</span>
+                  {t.creditCards.totalInstallments}
+                  <span className="text-xs text-gray-500 ml-1">{t.creditCards.monthlyPayments}</span>
                 </label>
                 <input
                   type="number"
@@ -1216,24 +1218,24 @@ const CreditCards: React.FC = () => {
               {transactionFormData.totalInstallments > 1 && (
                 <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
                   <p className="text-xs text-gray-600">
-                    <span className="font-medium">Monto por cuota:</span> {formatCurrency(parseFloat(cleanNumberValue(transactionFormData.amount)) / transactionFormData.totalInstallments)}
+                    <span className="font-medium">{t.creditCards.amountPerInstallment}:</span> {formatCurrency(parseFloat(cleanNumberValue(transactionFormData.amount)) / transactionFormData.totalInstallments)}
                   </p>
                   <p className="text-xs text-gray-600 mt-1">
-                    <span className="font-medium">Total de cuotas:</span> {transactionFormData.totalInstallments}
+                    <span className="font-medium">{t.creditCards.totalInstallmentsLabel}:</span> {transactionFormData.totalInstallments}
                   </p>
                 </div>
               )}
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Notas (opcional)
+                  {t.creditCards.notes} {t.creditCards.optional}
                 </label>
                 <textarea
                   value={transactionFormData.notes}
                   onChange={(e) => setTransactionFormData({...transactionFormData, notes: e.target.value})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                   rows={3}
-                  placeholder="Información adicional (opcional)"
+                  placeholder={t.creditCards.additionalInfo}
                 />
               </div>
 
@@ -1243,13 +1245,13 @@ const CreditCards: React.FC = () => {
                   onClick={handleCloseTransactionForm}
                   className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
                 >
-                  Cancelar
+                  {t.creditCards.cancel}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 px-4 py-2 bg-[#0f0f0f] text-white rounded-xl hover:bg-gray-800 transition-colors"
                 >
-                  Guardar gasto
+                  {t.creditCards.saveExpense}
                 </button>
               </div>
             </form>

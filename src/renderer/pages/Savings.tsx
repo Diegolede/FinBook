@@ -10,8 +10,9 @@ import {
   Minus
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { es, enUS } from 'date-fns/locale';
 import { formatCurrency } from '../utils/currency';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface SavingsGoal {
   id: string;
@@ -32,6 +33,7 @@ interface SavingsAccount {
 }
 
 const Savings: React.FC = () => {
+  const { t, language } = useLanguage();
   const [savingsGoals, setSavingsGoals] = useState<SavingsGoal[]>([]);
   const [savingsAccounts, setSavingsAccounts] = useState<SavingsAccount[]>([]);
   const [loading, setLoading] = useState(true);
@@ -153,12 +155,12 @@ const Savings: React.FC = () => {
     e.preventDefault();
     
     if (!goalFormData.name.trim()) {
-      alert('Por favor, ingresa un nombre para la meta.');
+      alert(`${t.common.pleaseEnter} un nombre para la meta.`);
       return;
     }
     
     if (!goalFormData.category) {
-      alert('Por favor, selecciona una categoría.');
+      alert(`${t.common.pleaseSelect} ${t.common.category}.`);
       return;
     }
     
@@ -166,12 +168,12 @@ const Savings: React.FC = () => {
     const currentAmount = parseFloat(cleanNumberValue(goalFormData.currentAmount));
     
     if (isNaN(targetAmount) || targetAmount <= 0) {
-      alert('Por favor, ingresa un monto objetivo válido mayor a cero.');
+      alert(`${t.common.pleaseEnter} un monto objetivo válido ${t.common.greaterThanZero}.`);
       return;
     }
     
     if (isNaN(currentAmount) || currentAmount < 0) {
-      alert('Por favor, ingresa un monto actual válido (mayor o igual a cero).');
+      alert(`${t.common.pleaseEnter} un monto actual válido (mayor o igual a cero).`);
       return;
     }
     
@@ -196,7 +198,7 @@ const Savings: React.FC = () => {
       handleCloseGoalForm();
     } catch (error) {
       console.error('Error saving goal:', error);
-      alert('Error al guardar la meta. Por favor, intenta de nuevo.');
+      alert(`${t.common.errorSaving} la meta. ${t.common.pleaseEnter} intenta de nuevo.`);
     }
   };
 
@@ -204,7 +206,7 @@ const Savings: React.FC = () => {
     e.preventDefault();
     
     if (!accountFormData.name.trim()) {
-      alert('Por favor, ingresa un nombre para la cuenta.');
+      alert(`${t.common.pleaseEnter} un nombre para la cuenta.`);
       return;
     }
     
@@ -212,12 +214,12 @@ const Savings: React.FC = () => {
     const interestRate = parseFloat(cleanNumberValue(accountFormData.interestRate));
     
     if (isNaN(balance)) {
-      alert('Por favor, ingresa un saldo válido.');
+      alert(`${t.common.pleaseEnter} un saldo válido.`);
       return;
     }
     
     if (isNaN(interestRate) || interestRate < 0) {
-      alert('Por favor, ingresa una tasa de interés válida (mayor o igual a cero).');
+      alert(`${t.common.pleaseEnter} una tasa de interés válida (mayor o igual a cero).`);
       return;
     }
     
@@ -242,7 +244,7 @@ const Savings: React.FC = () => {
       handleCloseAccountForm();
     } catch (error) {
       console.error('Error saving account:', error);
-      alert('Error al guardar la cuenta. Por favor, intenta de nuevo.');
+      alert(`${t.common.errorSaving} la cuenta. ${t.common.pleaseEnter} intenta de nuevo.`);
     }
   };
 
@@ -315,9 +317,9 @@ const Savings: React.FC = () => {
   // Función para traducir tipos de cuenta
   const getAccountTypeLabel = (type: 'checking' | 'savings' | 'investment'): string => {
     const typeMap: Record<'checking' | 'savings' | 'investment', string> = {
-      'checking': 'Corriente',
-      'savings': 'Ahorros',
-      'investment': 'Inversión'
+      'checking': t.savings.checking,
+      'savings': t.savings.savings,
+      'investment': t.savings.investment
     };
     return typeMap[type] || type;
   };
@@ -332,7 +334,7 @@ const Savings: React.FC = () => {
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando datos...</p>
+          <p className="mt-4 text-gray-600">{t.savings.loadingData}</p>
         </div>
       </div>
     );
@@ -342,8 +344,8 @@ const Savings: React.FC = () => {
     <div className="pt-8 pb-6 px-6 space-y-6 max-w-[90rem] mx-auto relative z-10">
       {/* Título de la sección */}
       <div className="mb-2">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Ahorros</h1>
-        <p className="text-sm text-gray-600">Crea metas de ahorro, registra tus cuentas y haz seguimiento del progreso hacia tus objetivos financieros</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">{t.savings.title}</h1>
+        <p className="text-sm text-gray-600">{t.savings.subtitle}</p>
       </div>
 
       {/* Header con estadísticas principales */}
@@ -355,8 +357,8 @@ const Savings: React.FC = () => {
                 <PiggyBank className="w-7 h-7 text-gray-600" />
               </div>
               <div>
-                <p className="text-base font-medium text-gray-600">Ahorros totales</p>
-                <p className="text-xs text-gray-500">En todas las cuentas</p>
+                <p className="text-base font-medium text-gray-600">{t.savings.totalSavings}</p>
+                <p className="text-xs text-gray-500">{t.savings.allAccounts}</p>
               </div>
             </div>
           </div>
@@ -370,8 +372,8 @@ const Savings: React.FC = () => {
                 <BookHeart className="w-7 h-7 text-gray-600" />
               </div>
               <div>
-                <p className="text-base font-medium text-gray-600">Progreso de metas</p>
-                <p className="text-xs text-gray-500">Acumulado actual</p>
+                <p className="text-base font-medium text-gray-600">{t.savings.goalProgress}</p>
+                <p className="text-xs text-gray-500">{t.savings.currentAccumulated}</p>
               </div>
             </div>
           </div>
@@ -385,8 +387,8 @@ const Savings: React.FC = () => {
                 <BarChart3 className="w-7 h-7 text-gray-600" />
               </div>
               <div>
-                <p className="text-base font-medium text-gray-600">Progreso general</p>
-                <p className="text-xs text-gray-500">Porcentaje completado</p>
+                <p className="text-base font-medium text-gray-600">{t.savings.generalProgress}</p>
+                <p className="text-xs text-gray-500">{t.savings.percentageCompleted}</p>
               </div>
             </div>
           </div>
@@ -396,7 +398,7 @@ const Savings: React.FC = () => {
 
       {/* Acciones Rápidas */}
       <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-200 transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg">
-        <h3 className="text-base font-semibold text-gray-900 mb-3">Acciones rápidas</h3>
+        <h3 className="text-base font-semibold text-gray-900 mb-3">{t.savings.quickActions}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <button
             onClick={() => setShowGoalForm(true)}
@@ -406,8 +408,8 @@ const Savings: React.FC = () => {
               <Plus className="w-4 h-4 text-gray-600" />
             </div>
             <div className="text-left">
-              <p className="text-xs font-medium text-gray-900">Nueva meta</p>
-              <p className="text-xs text-gray-500">Establecer meta</p>
+              <p className="text-xs font-medium text-gray-900">{t.savings.newGoal}</p>
+              <p className="text-xs text-gray-500">{t.savings.setGoal}</p>
             </div>
           </button>
           
@@ -419,8 +421,8 @@ const Savings: React.FC = () => {
               <PiggyBank className="w-4 h-4 text-gray-600" />
             </div>
             <div className="text-left">
-              <p className="text-xs font-medium text-gray-900">Nueva cuenta</p>
-              <p className="text-xs text-gray-500">Registrar cuenta</p>
+              <p className="text-xs font-medium text-gray-900">{t.savings.newAccount}</p>
+              <p className="text-xs text-gray-500">{t.savings.registerAccount}</p>
             </div>
           </button>
         </div>
@@ -429,8 +431,8 @@ const Savings: React.FC = () => {
       {/* Metas de Ahorro */}
       <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200 transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-gray-900">Metas de ahorro</h3>
-          <p className="text-xs text-gray-500">{savingsGoals.length} metas</p>
+          <h3 className="text-sm font-semibold text-gray-900">{t.savings.savingsGoals}</h3>
+          <p className="text-xs text-gray-500">{savingsGoals.length} {t.savings.goals}</p>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -468,30 +470,30 @@ const Savings: React.FC = () => {
                 
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Actual:</span>
+                    <span className="text-gray-600">{t.savings.current}:</span>
                     <span className="font-medium text-gray-700">{formatCurrency(goal.currentAmount)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Objetivo:</span>
+                    <span className="text-gray-600">{t.savings.objective}:</span>
                     <span className="font-medium">{formatCurrency(goal.targetAmount)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Progreso:</span>
+                    <span className="text-gray-600">{t.savings.progress}:</span>
                     <span className="font-medium text-gray-700">
                       {progress.toFixed(1)}%
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Fecha objetivo:</span>
+                    <span className="text-gray-600">{t.savings.targetDate}:</span>
                     <span className="font-medium">
-                      {format(new Date(goal.targetDate), 'dd/MM/yyyy', { locale: es })}
+                      {format(new Date(goal.targetDate), 'dd/MM/yyyy', { locale: language === 'es' ? es : enUS })}
                     </span>
                   </div>
                   {daysUntilBookHeart > 0 && (
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Días restantes:</span>
+                      <span className="text-gray-600">{t.savings.daysRemaining}:</span>
                       <span className="font-medium text-gray-700">
-                        {daysUntilBookHeart} días
+                        {daysUntilBookHeart} {t.savings.days}
                       </span>
                     </div>
                   )}
@@ -516,13 +518,13 @@ const Savings: React.FC = () => {
                     onClick={() => openAdjustForGoal(goal, true)}
                     className="flex items-center justify-center gap-1 px-3 py-2 text-xs bg-[#0f0f0f] text-white rounded-xl hover:bg-gray-800 transition-colors"
                   >
-                    <Plus className="w-3 h-3" /> Depositar
+                    <Plus className="w-3 h-3" /> {t.savings.deposit}
                   </button>
                   <button
                     onClick={() => openAdjustForGoal(goal, false)}
                     className="flex items-center justify-center gap-1 px-3 py-2 text-xs bg-gray-100 text-gray-800 rounded-xl hover:bg-gray-200 transition-colors"
                   >
-                    <Minus className="w-3 h-3" /> Retirar
+                    <Minus className="w-3 h-3" /> {t.savings.withdraw}
                   </button>
                 </div>
               </div>
@@ -534,8 +536,8 @@ const Savings: React.FC = () => {
       {/* Cuentas de Ahorro */}
       <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200 transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-gray-900">Cuentas de ahorro</h3>
-          <p className="text-xs text-gray-500">{savingsAccounts.length} cuentas</p>
+          <h3 className="text-sm font-semibold text-gray-900">{t.savings.savingsAccounts}</h3>
+          <p className="text-xs text-gray-500">{savingsAccounts.length} {t.savings.accounts}</p>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -569,15 +571,15 @@ const Savings: React.FC = () => {
               
               <div className="space-y-2 text-xs">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Saldo:</span>
+                    <span className="text-gray-600">{t.savings.currentBalance || 'Saldo'}:</span>
                   <span className="font-medium text-gray-700">{formatCurrency(account.balance)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Interés:</span>
+                    <span className="text-gray-600">{t.savings.interest}:</span>
                   <span className="font-medium">{account.interestRate}%</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Ganancia anual:</span>
+                    <span className="text-gray-600">{t.savings.annualGain}:</span>
                   <span className="font-medium text-gray-700">
                     {formatCurrency(account.balance * (account.interestRate / 100))}
                   </span>
@@ -609,7 +611,7 @@ const Savings: React.FC = () => {
           <div className="bg-white rounded-3xl p-6 w-full max-w-md mx-4 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">
-                {editingGoal ? 'Editar meta' : 'Nueva meta de ahorro'}
+                {editingGoal ? t.savings.editGoal : t.savings.newSavingsGoal}
               </h2>
               <button
                 onClick={handleCloseGoalForm}
@@ -622,8 +624,8 @@ const Savings: React.FC = () => {
             <form onSubmit={handleGoalSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nombre de la meta
-                  <span className="text-xs text-gray-500 ml-1">(objetivo de ahorro)</span>
+                  {t.savings.goalName}
+                  <span className="text-xs text-gray-500 ml-1">{t.savings.savingsObjective}</span>
                 </label>
                 <input
                   type="text"
@@ -631,15 +633,15 @@ const Savings: React.FC = () => {
                   value={goalFormData.name}
                   onChange={(e) => setGoalFormData({...goalFormData, name: e.target.value})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                  placeholder="Ej: Vacaciones de verano, fondo de emergencia, compra de auto..."
+                  placeholder={`${t.common.example} ${language === 'es' ? 'Vacaciones de verano, fondo de emergencia, compra de auto...' : 'Summer vacation, emergency fund, car purchase...'}`}
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Monto objetivo
-                  <span className="text-xs text-gray-500 ml-1">(cuánto quieres ahorrar)</span>
+                  {t.savings.targetAmount}
+                  <span className="text-xs text-gray-500 ml-1">{t.savings.howMuchSave}</span>
                 </label>
                   <input
                     type="text"
@@ -647,13 +649,13 @@ const Savings: React.FC = () => {
                     value={goalFormData.targetAmount}
                     onChange={(e) => setGoalFormData({...goalFormData, targetAmount: formatNumberInput(e.target.value)})}
                     className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                    placeholder="0.00 (solo números)"
+                    placeholder={t.common.numbersOnly}
                   />
                 </div>
                 <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Monto actual
-                  <span className="text-xs text-gray-500 ml-1">(cuánto has ahorrado hasta ahora)</span>
+                  {t.savings.currentAmount}
+                  <span className="text-xs text-gray-500 ml-1">{t.savings.howMuchSaved}</span>
                 </label>
                   <input
                     type="text"
@@ -661,7 +663,7 @@ const Savings: React.FC = () => {
                     value={goalFormData.currentAmount}
                     onChange={(e) => setGoalFormData({...goalFormData, currentAmount: formatNumberInput(e.target.value)})}
                     className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                    placeholder="0.00 (solo números)"
+                    placeholder={t.common.numbersOnly}
                   />
                 </div>
               </div>
@@ -669,7 +671,7 @@ const Savings: React.FC = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Categoría
+                    {t.savings.category}
                   </label>
                   <select
                     required
@@ -678,17 +680,17 @@ const Savings: React.FC = () => {
                     className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                   >
                     <option value="">Seleccionar categoría</option>
-                    <option value="Vacaciones">Vacaciones</option>
-                    <option value="Emergencias">Emergencias</option>
-                    <option value="Transporte">Transporte</option>
-                    <option value="Vivienda">Vivienda</option>
-                    <option value="Educación">Educación</option>
-                    <option value="Otros">Otros</option>
+                    <option value={t.common.vacations}>{t.common.vacations}</option>
+                    <option value={t.common.emergencies}>{t.common.emergencies}</option>
+                    <option value={t.common.transportation}>{t.common.transportation}</option>
+                    <option value={t.common.housing}>{t.common.housing}</option>
+                    <option value={t.common.education}>{t.common.education}</option>
+                    <option value={t.common.other}>{t.common.other}</option>
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Fecha objetivo
+                    {t.savings.targetDate}
                   </label>
                   <input
                     type="date"
@@ -702,14 +704,14 @@ const Savings: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Notas (opcional)
+                  {t.savings.notes} {t.savings.optional}
                 </label>
                 <textarea
                   value={goalFormData.notes}
                   onChange={(e) => setGoalFormData({...goalFormData, notes: e.target.value})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                   rows={3}
-                  placeholder="Información adicional (opcional)"
+                  placeholder={t.savings.additionalInfo}
                 />
               </div>
 
@@ -719,13 +721,13 @@ const Savings: React.FC = () => {
                   onClick={handleCloseGoalForm}
                   className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
                 >
-                  Cancelar
+                  {t.savings.cancel}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 px-4 py-2 bg-[#0f0f0f] text-white rounded-xl hover:bg-gray-800 transition-colors"
                 >
-                  {editingGoal ? 'Actualizar' : 'Guardar'}
+                  {editingGoal ? t.savings.update : t.savings.save}
                 </button>
               </div>
             </form>
@@ -739,7 +741,7 @@ const Savings: React.FC = () => {
           <div className="bg-white rounded-3xl p-6 w-full max-w-md mx-4 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">
-                {editingAccount ? 'Editar cuenta' : 'Nueva cuenta de ahorro'}
+                {editingAccount ? t.savings.editAccount : t.savings.newSavingsAccount}
               </h2>
               <button
                 onClick={handleCloseAccountForm}
@@ -752,8 +754,8 @@ const Savings: React.FC = () => {
             <form onSubmit={handleAccountSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nombre de la cuenta
-                  <span className="text-xs text-gray-500 ml-1">(identificador de la cuenta)</span>
+                  {t.savings.accountName}
+                  <span className="text-xs text-gray-500 ml-1">{t.savings.accountIdentifier}</span>
                 </label>
                 <input
                   type="text"
@@ -761,15 +763,15 @@ const Savings: React.FC = () => {
                   value={accountFormData.name}
                   onChange={(e) => setAccountFormData({...accountFormData, name: e.target.value})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                  placeholder="Ej: Cuenta principal, fondo de emergencia..."
+                  placeholder={`${t.common.example} ${language === 'es' ? 'Cuenta principal, fondo de emergencia...' : 'Main account, emergency fund...'}`}
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Saldo actual
-                  <span className="text-xs text-gray-500 ml-1">(dinero disponible en la cuenta)</span>
+                  {t.savings.currentBalance}
+                  <span className="text-xs text-gray-500 ml-1">{t.savings.moneyAvailable}</span>
                 </label>
                   <input
                     type="text"
@@ -777,13 +779,13 @@ const Savings: React.FC = () => {
                     value={accountFormData.balance}
                     onChange={(e) => setAccountFormData({...accountFormData, balance: formatNumberInput(e.target.value)})}
                     className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                    placeholder="0.00 (solo números)"
+                    placeholder={t.common.numbersOnly}
                   />
                 </div>
                 <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tasa de interés (%)
-                  <span className="text-xs text-gray-500 ml-1">(rendimiento anual estimado)</span>
+                  {t.savings.interestRate}
+                  <span className="text-xs text-gray-500 ml-1">{t.savings.annualYield}</span>
                 </label>
                   <input
                     type="text"
@@ -798,7 +800,7 @@ const Savings: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tipo de cuenta
+                  {t.savings.accountType}
                 </label>
                 <select
                   required
@@ -806,9 +808,9 @@ const Savings: React.FC = () => {
                   onChange={(e) => setAccountFormData({...accountFormData, type: e.target.value as 'checking' | 'savings' | 'investment'})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                 >
-                  <option value="savings">Ahorros</option>
-                  <option value="checking">Corriente</option>
-                  <option value="investment">Inversión</option>
+                  <option value="savings">{t.savings.savings}</option>
+                  <option value="checking">{t.savings.checking}</option>
+                  <option value="investment">{t.savings.investment}</option>
                 </select>
               </div>
 
@@ -818,13 +820,13 @@ const Savings: React.FC = () => {
                   onClick={handleCloseAccountForm}
                   className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
                 >
-                  Cancelar
+                  {t.savings.cancel}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 px-4 py-2 bg-[#0f0f0f] text-white rounded-xl hover:bg-gray-800 transition-colors"
                 >
-                  {editingAccount ? 'Actualizar' : 'Guardar'}
+                  {editingAccount ? t.savings.update : t.savings.save}
                 </button>
               </div>
             </form>
@@ -837,8 +839,9 @@ const Savings: React.FC = () => {
           <div className="bg-white rounded-3xl p-6 w-full max-w-md mx-4 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">
-                {adjustContext.isDeposit ? 'Depositar' : 'Retirar'}{' '}
-                {adjustContext.type === 'goal' ? 'en meta' : 'en cuenta'}
+                {adjustContext.isDeposit 
+                  ? (adjustContext.type === 'goal' ? t.savings.depositInGoal : t.savings.depositInAccount)
+                  : (adjustContext.type === 'goal' ? t.savings.withdrawFromGoal : t.savings.withdrawFromAccount)}
               </h2>
               <button
                 onClick={closeAdjustModal}
@@ -862,8 +865,8 @@ const Savings: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Monto
-                  <span className="text-xs text-gray-500 ml-1">(cantidad a depositar o retirar)</span>
+                  {t.savings.amount}
+                  <span className="text-xs text-gray-500 ml-1">{t.savings.amountToDeposit}</span>
                 </label>
                 <input
                   type="text"
@@ -871,7 +874,7 @@ const Savings: React.FC = () => {
                   value={adjustAmount}
                   onChange={(e) => setAdjustAmount(formatNumberInput(e.target.value))}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                  placeholder="0.00 (solo números)"
+                  placeholder={t.common.numbersOnly}
                 />
               </div>
 
@@ -881,13 +884,13 @@ const Savings: React.FC = () => {
                   onClick={closeAdjustModal}
                   className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
                 >
-                  Cancelar
+                  {t.savings.cancel}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 px-4 py-2 bg-[#0f0f0f] text-white rounded-xl hover:bg-gray-800 transition-colors"
                 >
-                  Confirmar
+                  {t.savings.confirm}
                 </button>
               </div>
             </form>
