@@ -16,7 +16,7 @@ export interface Translations {
     loading: string;
     version: string;
   };
-  
+
   // Menu
   menu: {
     home: string;
@@ -27,7 +27,7 @@ export interface Translations {
     quit: string;
     settings: string;
   };
-  
+
   // Dashboard
   dashboard: {
     title: string;
@@ -65,7 +65,7 @@ export interface Translations {
     customMethod: string;
     percentage: string;
   };
-  
+
   // Income
   income: {
     title: string;
@@ -117,7 +117,7 @@ export interface Translations {
     delete: string;
     loadingData: string;
   };
-  
+
   // Expenses
   expenses: {
     title: string;
@@ -171,7 +171,7 @@ export interface Translations {
     currentProgress: string;
     completed: string;
   };
-  
+
   // Credit Cards
   creditCards: {
     title: string;
@@ -249,7 +249,7 @@ export interface Translations {
     pendingInstallments: string;
     paymentCompleted: string;
   };
-  
+
   // Savings
   savings: {
     title: string;
@@ -315,7 +315,7 @@ export interface Translations {
     confirm: string;
     loadingData: string;
   };
-  
+
   // Categories
   categories: {
     title: string;
@@ -335,7 +335,7 @@ export interface Translations {
     update: string;
     loadingCategories: string;
   };
-  
+
   // Reports
   reports: {
     title: string;
@@ -353,7 +353,7 @@ export interface Translations {
     all: string;
     loadingReports: string;
   };
-  
+
   // Transactions
   transactions: {
     title: string;
@@ -389,7 +389,7 @@ export interface Translations {
     delete: string;
     loadingTransactions: string;
   };
-  
+
   // Settings
   settings: {
     title: string;
@@ -398,7 +398,7 @@ export interface Translations {
     spanish: string;
     english: string;
   };
-  
+
   // Common
   common: {
     error: string;
@@ -442,7 +442,7 @@ const translations: Record<Language, Translations> = {
       welcome: 'Bienvenido a FinBook',
       welcomeSubtitle: 'Vista general de tus ingresos, gastos y balance del mes actual',
       loading: 'Cargando información...',
-      version: 'FinBook v1.1.0',
+      version: 'FinBook v1.1.1',
     },
     menu: {
       home: 'Inicio',
@@ -458,8 +458,8 @@ const translations: Record<Language, Translations> = {
       subtitle: 'Vista general de tus ingresos, gastos y balance del mes actual',
       income: 'Ingresos',
       expenses: 'Gastos',
-      balance: 'Balance',
-      currentMonth: 'Mes actual',
+      balance: 'Saldo',
+      currentMonth: 'De este mes',
       quickActions: 'Acciones rápidas',
       registerIncome: 'Registrar ingreso',
       addMoneyReceived: 'Agregar dinero recibido',

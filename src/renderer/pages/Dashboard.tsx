@@ -113,6 +113,17 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const handleTransactionClick = (transaction: any) => {
+    // Si la transacción tiene creditCardId, navegar a tarjetas de crédito
+    if (transaction.creditCardId) {
+      navigate('/credit-cards');
+    } else if (transaction.type === 'income') {
+      navigate('/income');
+    } else if (transaction.type === 'expense') {
+      navigate('/expenses');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -220,8 +231,8 @@ const Dashboard: React.FC = () => {
                     key={p.title}
                     type="button"
                     className={`text-left p-4 rounded-xl border-2 transition-all duration-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-gray-300 ${isSelected
-                        ? 'border-gray-900 bg-gray-100 shadow-md'
-                        : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
+                      ? 'border-gray-900 bg-gray-100 shadow-md'
+                      : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
                       }`}
                     onClick={() => applyPreset(p)}
                   >
@@ -363,11 +374,16 @@ const Dashboard: React.FC = () => {
 
       {/* Tercera fila: Transacciones Recientes */}
       <div className="bg-white rounded-3xl p-7 shadow-sm border border-gray-200 transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg">
-        <h3 className="text-lg font-semibold text-gray-900 mb-5">{t.dashboard.recentTransactions}</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">{t.dashboard.recentTransactions}</h3>
+        <p className="text-sm text-gray-600 mb-5">Tus últimos 5 movimientos</p>
         <div className="space-y-3">
           {recentTransactions.length > 0 ? (
             recentTransactions.map((transaction) => (
-              <div key={transaction.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md border border-gray-100">
+              <div
+                key={transaction.id}
+                onClick={() => handleTransactionClick(transaction)}
+                className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md border border-gray-100 cursor-pointer"
+              >
                 <div className="flex items-center space-x-3">
                   <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${transaction.type === 'income' ? 'bg-gray-100' : 'bg-gray-100'
                     }`}>
