@@ -80,10 +80,10 @@ app.whenReady().then(() => {
 
   const menu = Menu.buildFromTemplate(template);
   Menu.setApplicationMenu(menu);
-  
+
   // Inicializar la base de datos
   dbService = new DatabaseService();
-  
+
   createWindow();
 
   app.on('activate', () => {
@@ -191,6 +191,23 @@ ipcMain.handle('updateCreditCard', async (event, card) => {
 
 ipcMain.handle('deleteCreditCard', async (event, id) => {
   return await dbService.deleteCreditCard(id);
+});
+
+// IPC Handlers para Checklist Items (Notas)
+ipcMain.handle('db-get-checklist-items', async () => {
+  return await dbService.getChecklistItems();
+});
+
+ipcMain.handle('db-add-checklist-item', async (event, text) => {
+  return await dbService.addChecklistItem(text);
+});
+
+ipcMain.handle('db-toggle-checklist-item', async (event, id, completed) => {
+  return await dbService.toggleChecklistItem(id, completed);
+});
+
+ipcMain.handle('db-delete-checklist-item', async (event, id) => {
+  return await dbService.deleteChecklistItem(id);
 });
 
 // IPC Handlers para metas mensuales

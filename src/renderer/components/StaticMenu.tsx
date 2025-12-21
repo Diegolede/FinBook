@@ -8,11 +8,11 @@
 
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { 
-  Notebook, 
-  CreditCard, 
-  TrendingUp, 
-  TrendingDown, 
+import {
+  Notebook,
+  CreditCard,
+  TrendingUp,
+  TrendingDown,
   PiggyBank,
   LogOut,
   Settings,
@@ -38,16 +38,16 @@ const StaticMenu: React.FC<StaticMenuProps> = ({ onOpenSettings }) => {
   ];
 
   return (
-    <aside 
+    <aside
       className="h-screen bg-white border-r border-gray-200 shadow-md flex flex-col animate-slide-in-left transition-all duration-300 ease-in-out w-20"
     >
       {/* Header with Logo */}
       <div className="p-4 pb-3">
         <NavLink to="/" className="flex items-center justify-center select-none group">
-          <img 
-            src={finbookLogo} 
-            alt="Finbook Logo" 
-            className="block transition-all duration-300 w-12 h-12 rounded-xl group-hover:scale-110 group-active:scale-95" 
+          <img
+            src={finbookLogo}
+            alt="Finbook Logo"
+            className="block transition-all duration-300 w-12 h-12 rounded-xl group-hover:scale-110 group-active:scale-95"
           />
         </NavLink>
       </div>
@@ -83,9 +83,8 @@ const StaticMenu: React.FC<StaticMenuProps> = ({ onOpenSettings }) => {
                 title={item.label}
               >
                 {({ isActive }) => (
-                  <item.icon className={`transition-all duration-300 w-6 h-6 ${
-                    isActive ? 'text-white' : 'text-gray-500 group-hover:text-gray-700'
-                  }`} />
+                  <item.icon className={`transition-all duration-300 w-6 h-6 ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-gray-700'
+                    }`} />
                 )}
               </NavLink>
             </li>
@@ -111,7 +110,7 @@ const StaticMenu: React.FC<StaticMenuProps> = ({ onOpenSettings }) => {
             className="group relative flex items-center justify-center w-12 h-12 text-gray-600 hover:text-gray-900 hover:bg-gray-50 hover:shadow-sm rounded-xl transition-all duration-300 ease-[cubic-bezier(.22,1,.36,1)] focus:outline-none transform hover:scale-110 active:scale-95"
             title={t.menu.settings}
           >
-            <Settings className="transition-all duration-300 w-6 h-6 text-gray-500 group-hover:text-gray-700" />
+            <Settings className="transition-all duration-500 ease-in-out w-6 h-6 text-gray-500 group-hover:text-gray-700 group-hover:rotate-[360deg]" />
           </button>
         </div>
 

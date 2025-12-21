@@ -15,12 +15,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   addTransaction: (transaction: any) => ipcRenderer.invoke('db-add-transaction', transaction),
   updateTransaction: (transaction: any) => ipcRenderer.invoke('db-update-transaction', transaction),
   deleteTransaction: (id: string) => ipcRenderer.invoke('db-delete-transaction', id),
-  
+
   // Categorías
   getCategories: () => ipcRenderer.invoke('db-get-categories'),
   addCategory: (category: any) => ipcRenderer.invoke('db-add-category', category),
   updateCategory: (category: any) => ipcRenderer.invoke('db-update-category', category),
-  
+
   // Resumen
   getSummary: () => ipcRenderer.invoke('db-get-summary'),
 
@@ -45,6 +45,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   addCreditCard: (card: any) => ipcRenderer.invoke('addCreditCard', card),
   updateCreditCard: (card: any) => ipcRenderer.invoke('updateCreditCard', card),
   deleteCreditCard: (id: string) => ipcRenderer.invoke('deleteCreditCard', id),
+
+  // Checklist Items (Notas)
+  getChecklistItems: () => ipcRenderer.invoke('db-get-checklist-items'),
+  addChecklistItem: (text: string) => ipcRenderer.invoke('db-add-checklist-item', text),
+  toggleChecklistItem: (id: string, completed: boolean) => ipcRenderer.invoke('db-toggle-checklist-item', id, completed),
+  deleteChecklistItem: (id: string) => ipcRenderer.invoke('db-delete-checklist-item', id),
 
   // Metas Mensuales
   getMonthlyGoal: (month: string, year: number, type: 'expense' | 'income') => ipcRenderer.invoke('getMonthlyGoal', month, year, type),
@@ -81,6 +87,12 @@ declare global {
       addCreditCard: (card: any) => Promise<any>;
       updateCreditCard: (card: any) => Promise<any>;
       deleteCreditCard: (id: string) => Promise<any>;
+      // Checklist Items
+      getChecklistItems: () => Promise<any[]>;
+      addChecklistItem: (text: string) => Promise<any>;
+      toggleChecklistItem: (id: string, completed: boolean) => Promise<void>;
+      deleteChecklistItem: (id: string) => Promise<void>;
+
       getMonthlyGoal: (month: string, year: number, type: 'expense' | 'income') => Promise<any | null>;
       saveMonthlyGoal: (goal: any) => Promise<any>;
       getDatabasePath: () => Promise<string>;

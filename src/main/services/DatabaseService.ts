@@ -88,6 +88,13 @@ export interface BudgetAllocation {
   methodTitle?: string; // Título del método seleccionado
 }
 
+export interface ChecklistItem {
+  id: string;
+  text: string;
+  completed: boolean;
+  created_at?: string;
+}
+
 export class DatabaseService {
   private db: sqlite3.Database;
   private dbPath: string;
@@ -273,6 +280,16 @@ export class DatabaseService {
         )
       `);
 
+      // Crear tabla de checklist_items para notas
+      this.db.run(`
+        CREATE TABLE IF NOT EXISTS checklist_items (
+          id TEXT PRIMARY KEY,
+          text TEXT NOT NULL,
+          completed INTEGER DEFAULT 0,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+
       // Insertar categorías por defecto (no bloqueante)
       this.insertDefaultCategoriesIfNeeded().catch((err) => {
         console.error('Error seeding default categories:', err);
@@ -297,9 +314,9 @@ export class DatabaseService {
           reject(err);
           return;
         }
-        
+
         const hasColorColumn = rows.some((row: any) => row.name === 'color');
-        
+
         if (hasColorColumn) {
           // Recrear tabla savings_goals sin color
           this.db.serialize(() => {
@@ -315,12 +332,12 @@ export class DatabaseService {
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
               )
             `);
-            
+
             this.db.run(`
               INSERT INTO savings_goals_new (id, name, targetAmount, currentAmount, targetDate, category, notes, created_at)
               SELECT id, name, targetAmount, currentAmount, targetDate, category, notes, created_at FROM savings_goals
             `);
-            
+
             this.db.run(`DROP TABLE savings_goals`);
             this.db.run(`ALTER TABLE savings_goals_new RENAME TO savings_goals`);
           });
@@ -332,9 +349,9 @@ export class DatabaseService {
             reject(err2);
             return;
           }
-          
+
           const hasColorColumn2 = rows2.some((row: any) => row.name === 'color');
-          
+
           if (hasColorColumn2) {
             // Recrear tabla savings_accounts sin color
             this.db.serialize(() => {
@@ -348,15 +365,15 @@ export class DatabaseService {
                   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
                 )
               `);
-              
+
               this.db.run(`
                 INSERT INTO savings_accounts_new (id, name, balance, interestRate, type, created_at)
                 SELECT id, name, balance, interestRate, type, created_at FROM savings_accounts
               `);
-              
+
               this.db.run(`DROP TABLE savings_accounts`);
               this.db.run(`ALTER TABLE savings_accounts_new RENAME TO savings_accounts`);
-              
+
               resolve();
             });
           } else {
@@ -464,7 +481,7 @@ export class DatabaseService {
       this.db.run(
         'INSERT INTO transactions (id, description, amount, type, category, date, notes, creditCardId, totalInstallments, paidInstallments, isFixedExpense) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         [newTransaction.id, newTransaction.description, newTransaction.amount, newTransaction.type, newTransaction.category, newTransaction.date, newTransaction.notes, newTransaction.creditCardId || null, newTransaction.totalInstallments || null, newTransaction.paidInstallments || null, newTransaction.isFixedExpense ? 1 : 0],
-        function(err) {
+        function (err) {
           if (err) reject(err);
           else resolve(newTransaction);
         }
@@ -477,7 +494,7 @@ export class DatabaseService {
       this.db.run(
         'UPDATE transactions SET description = ?, amount = ?, type = ?, category = ?, date = ?, notes = ?, creditCardId = ?, totalInstallments = ?, paidInstallments = ?, isFixedExpense = ? WHERE id = ?',
         [transaction.description, transaction.amount, transaction.type, transaction.category, transaction.date, transaction.notes, transaction.creditCardId || null, transaction.totalInstallments || null, transaction.paidInstallments || null, transaction.isFixedExpense ? 1 : 0, transaction.id],
-        function(err) {
+        function (err) {
           if (err) reject(err);
           else resolve(transaction);
         }
@@ -487,7 +504,7 @@ export class DatabaseService {
 
   async deleteTransaction(id: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.db.run('DELETE FROM transactions WHERE id = ?', [id], function(err) {
+      this.db.run('DELETE FROM transactions WHERE id = ?', [id], function (err) {
         if (err) reject(err);
         else resolve();
       });
@@ -563,7 +580,7 @@ export class DatabaseService {
       this.db.run(
         'INSERT INTO categories (id, name, type, color) VALUES (?, ?, ?, ?)',
         [newCategory.id, newCategory.name, newCategory.type, newCategory.color],
-        function(err) {
+        function (err) {
           if (err) reject(err);
           else resolve(newCategory);
         }
@@ -576,7 +593,7 @@ export class DatabaseService {
       this.db.run(
         'UPDATE categories SET name = ?, type = ?, color = ? WHERE id = ?',
         [category.name, category.type, category.color, category.id],
-        function(err) {
+        function (err) {
           if (err) reject(err);
           else resolve(category);
         }
@@ -678,7 +695,7 @@ export class DatabaseService {
       this.db.run(
         `INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)`,
         ['budget_allocation', value],
-        function(err) {
+        function (err) {
           if (err) reject(err);
           else resolve();
         }
@@ -706,7 +723,7 @@ export class DatabaseService {
       this.db.run(
         'INSERT INTO savings_goals (id, name, targetAmount, currentAmount, targetDate, category, notes) VALUES (?, ?, ?, ?, ?, ?, ?)',
         [newGoal.id, newGoal.name, newGoal.targetAmount, newGoal.currentAmount, newGoal.targetDate, newGoal.category, newGoal.notes || null],
-        function(err) {
+        function (err) {
           if (err) reject(err);
           else resolve(newGoal);
         }
@@ -719,7 +736,7 @@ export class DatabaseService {
       this.db.run(
         'UPDATE savings_goals SET name = ?, targetAmount = ?, currentAmount = ?, targetDate = ?, category = ?, notes = ? WHERE id = ?',
         [goal.name, goal.targetAmount, goal.currentAmount, goal.targetDate, goal.category, goal.notes || null, goal.id],
-        function(err) {
+        function (err) {
           if (err) reject(err);
           else resolve(goal);
         }
@@ -729,7 +746,7 @@ export class DatabaseService {
 
   async deleteSavingsGoal(id: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.db.run('DELETE FROM savings_goals WHERE id = ?', [id], function(err) {
+      this.db.run('DELETE FROM savings_goals WHERE id = ?', [id], function (err) {
         if (err) reject(err);
         else resolve();
       });
@@ -756,7 +773,7 @@ export class DatabaseService {
       this.db.run(
         'INSERT INTO savings_accounts (id, name, balance, interestRate, type) VALUES (?, ?, ?, ?, ?)',
         [newAccount.id, newAccount.name, newAccount.balance, newAccount.interestRate, newAccount.type],
-        function(err) {
+        function (err) {
           if (err) reject(err);
           else resolve(newAccount);
         }
@@ -769,7 +786,7 @@ export class DatabaseService {
       this.db.run(
         'UPDATE savings_accounts SET name = ?, balance = ?, interestRate = ?, type = ? WHERE id = ?',
         [account.name, account.balance, account.interestRate, account.type, account.id],
-        function(err) {
+        function (err) {
           if (err) reject(err);
           else resolve(account);
         }
@@ -779,7 +796,7 @@ export class DatabaseService {
 
   async deleteSavingsAccount(id: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.db.run('DELETE FROM savings_accounts WHERE id = ?', [id], function(err) {
+      this.db.run('DELETE FROM savings_accounts WHERE id = ?', [id], function (err) {
         if (err) reject(err);
         else resolve();
       });
@@ -796,6 +813,66 @@ export class DatabaseService {
           else resolve(rows as CreditCard[]);
         }
       );
+    });
+  }
+
+  // Métodos para Checklist Items (Notas)
+  async getChecklistItems(): Promise<ChecklistItem[]> {
+    return new Promise((resolve, reject) => {
+      this.db.all(
+        'SELECT * FROM checklist_items ORDER BY created_at ASC',
+        (err, rows) => {
+          if (err) reject(err);
+          else {
+            const items = (rows as any[]).map(row => ({
+              ...row,
+              completed: row.completed === 1
+            }));
+            resolve(items as ChecklistItem[]);
+          }
+        }
+      );
+    });
+  }
+
+  async addChecklistItem(text: string): Promise<ChecklistItem> {
+    const newItem: ChecklistItem = {
+      id: uuidv4(),
+      text,
+      completed: false
+    };
+
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        'INSERT INTO checklist_items (id, text, completed) VALUES (?, ?, ?)',
+        [newItem.id, newItem.text, 0], // 0 for false
+        function (err) {
+          if (err) reject(err);
+          else resolve(newItem);
+        }
+      );
+    });
+  }
+
+  async toggleChecklistItem(id: string, completed: boolean): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        'UPDATE checklist_items SET completed = ? WHERE id = ?',
+        [completed ? 1 : 0, id],
+        function (err) {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
+  async deleteChecklistItem(id: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.db.run('DELETE FROM checklist_items WHERE id = ?', [id], function (err) {
+        if (err) reject(err);
+        else resolve();
+      });
     });
   }
 
@@ -822,7 +899,7 @@ export class DatabaseService {
     // Usar valores por defecto para dueDate y color para compatibilidad con BD existentes
     const defaultDueDate = new Date().toISOString().split('T')[0];
     const defaultColor = '#0f0f0f';
-    
+
     return new Promise((resolve, reject) => {
       const sql = hasLastFourDigitsColumn
         ? 'INSERT INTO credit_cards (id, name, bank, "limit", dueDate, color, lastFourDigits) VALUES (?, ?, ?, ?, ?, ?, ?)'
@@ -831,7 +908,7 @@ export class DatabaseService {
         ? [newCard.id, newCard.name, newCard.bank, newCard.creditLimit, defaultDueDate, defaultColor, lastFourFallback]
         : [newCard.id, newCard.name, newCard.bank, newCard.creditLimit, defaultDueDate, defaultColor];
 
-      this.db.run(sql, params, function(err) {
+      this.db.run(sql, params, function (err) {
         if (err) reject(err);
         else resolve(newCard);
       });
@@ -842,12 +919,12 @@ export class DatabaseService {
     // Usar valores por defecto para dueDate y color para compatibilidad con BD existentes
     const defaultDueDate = new Date().toISOString().split('T')[0];
     const defaultColor = '#0f0f0f';
-    
+
     return new Promise((resolve, reject) => {
       this.db.run(
         'UPDATE credit_cards SET name = ?, bank = ?, "limit" = ?, dueDate = ?, color = ? WHERE id = ?',
         [card.name, card.bank, card.creditLimit, defaultDueDate, defaultColor, card.id],
-        function(err) {
+        function (err) {
           if (err) reject(err);
           else resolve(card);
         }
@@ -857,7 +934,7 @@ export class DatabaseService {
 
   async deleteCreditCard(id: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.db.run('DELETE FROM credit_cards WHERE id = ?', [id], function(err) {
+      this.db.run('DELETE FROM credit_cards WHERE id = ?', [id], function (err) {
         if (err) reject(err);
         else resolve();
       });
@@ -906,7 +983,7 @@ export class DatabaseService {
           this.db.run(
             'INSERT OR REPLACE INTO monthly_goals (id, targetAmount, currentAmount, month, year, type, notes) VALUES (?, ?, ?, ?, ?, ?, ?)',
             [newGoal.id, newGoal.targetAmount, newGoal.currentAmount, newGoal.month, newGoal.year, newGoal.type, newGoal.notes || null],
-            function(insertErr) {
+            function (insertErr) {
               if (insertErr) reject(insertErr);
               else resolve(newGoal);
             }

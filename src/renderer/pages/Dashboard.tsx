@@ -12,6 +12,7 @@ import {
 import { format } from 'date-fns';
 import { formatCurrency } from '../utils/currency';
 import { useLanguage } from '../contexts/LanguageContext';
+import ChecklistWidget from '../components/ChecklistWidget';
 
 interface Summary {
   totalIncome: number;
@@ -372,50 +373,58 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Tercera fila: Transacciones Recientes */}
-      <div className="bg-white rounded-3xl p-7 shadow-sm border border-gray-200 transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">{t.dashboard.recentTransactions}</h3>
-        <p className="text-sm text-gray-600 mb-5">Tus últimos 5 movimientos</p>
-        <div className="space-y-3">
-          {recentTransactions.length > 0 ? (
-            recentTransactions.map((transaction) => (
-              <div
-                key={transaction.id}
-                onClick={() => handleTransactionClick(transaction)}
-                className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md border border-gray-100 cursor-pointer"
-              >
-                <div className="flex items-center space-x-3">
-                  <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${transaction.type === 'income' ? 'bg-gray-100' : 'bg-gray-100'
-                    }`}>
-                    {transaction.type === 'income' ? (
-                      <TrendingUp className="w-5 h-5 text-gray-600" />
-                    ) : (
-                      <TrendingDown className="w-5 h-5 text-gray-600" />
-                    )}
+      {/* Tercera fila: Transacciones Recientes + Notas */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        {/* Notas (Primero en móvil, derecha en desktop) */}
+        <div className="lg:col-span-1 lg:col-start-3 h-full">
+          <ChecklistWidget />
+        </div>
+
+        {/* Transacciones (Segundo en móvil, izquierda en desktop) */}
+        <div className="lg:col-span-2 lg:col-start-1 lg:row-start-1 bg-white rounded-3xl p-7 shadow-sm border border-gray-200 transition-transform duration-300 ease-in-out hover:scale-[1.02] hover:shadow-lg">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">{t.dashboard.recentTransactions}</h3>
+          <p className="text-sm text-gray-600 mb-5">Tus últimos 5 movimientos</p>
+          <div className="space-y-3">
+            {recentTransactions.length > 0 ? (
+              recentTransactions.map((transaction) => (
+                <div
+                  key={transaction.id}
+                  onClick={() => handleTransactionClick(transaction)}
+                  className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md border border-gray-100 cursor-pointer"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${transaction.type === 'income' ? 'bg-gray-100' : 'bg-gray-100'
+                      }`}>
+                      {transaction.type === 'income' ? (
+                        <TrendingUp className="w-5 h-5 text-gray-600" />
+                      ) : (
+                        <TrendingDown className="w-5 h-5 text-gray-600" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">{transaction.description}</p>
+                      <p className="text-sm text-gray-600">{transaction.category}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium text-gray-900">{transaction.description}</p>
-                    <p className="text-sm text-gray-600">{transaction.category}</p>
+                  <div className="text-right">
+                    <p className={`font-semibold ${transaction.type === 'income' ? 'text-gray-700' : 'text-gray-700'
+                      }`}>
+                      {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
+                    </p>
+                    <p className="text-xs text-gray-600">
+                      {format(new Date(transaction.date), 'dd/MM/yyyy')}
+                    </p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className={`font-semibold ${transaction.type === 'income' ? 'text-gray-700' : 'text-gray-700'
-                    }`}>
-                    {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
-                  </p>
-                  <p className="text-xs text-gray-600">
-                    {format(new Date(transaction.date), 'dd/MM/yyyy')}
-                  </p>
-                </div>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <CreditCard className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500 mb-2">{t.dashboard.noTransactions}</p>
+                <p className="text-xs text-gray-400">{t.dashboard.useQuickActions}</p>
               </div>
-            ))
-          ) : (
-            <div className="text-center py-8">
-              <CreditCard className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 mb-2">{t.dashboard.noTransactions}</p>
-              <p className="text-xs text-gray-400">{t.dashboard.useQuickActions}</p>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>
