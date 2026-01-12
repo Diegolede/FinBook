@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="src/renderer/Finbook-logo.png" alt="Finbook Logo" width="180" />
+  <img src="src/logo.png" alt="Finbook Logo" width="180" />
   <h1>Finbook</h1>
   <p>
     <strong>Tu gestor de finanzas personales definitivo.</strong>
@@ -45,13 +45,25 @@
 
 
 
-## Requisitos y Dependencias
+## Tecnologías y Dependencias
 
-Finbook se distribuye como un archivo **AppImage** autocontenido. En la mayoría de los entornos de escritorio modernos (GNOME, KDE, XFCE), la aplicación funcionará de inmediato.
+### Stack Tecnológico
+Finbook está construido con tecnologías modernas para garantizar estabilidad y rendimiento:
+*   **Core**: [Electron](https://www.electronjs.org/) (Aplicación de escritorio)
+*   **Frontend**: [React](https://reactjs.org/) + [TypeScript](https://www.typescriptlang.org/)
+*   **Estilos**: [Tailwind CSS](https://tailwindcss.com/)
+*   **Base de Datos**: [SQLite](https://www.sqlite.org/) (Persistencia local)
+*   **Gráficos**: [Chart.js](https://www.chartjs.org/) + [Lucide React](https://lucide.dev/)
+
+---
+
+## Requisitos del Sistema (Linux)
+
+Finbook se distribuye como un archivo **AppImage** autocontenido. En la mayoría de los entornos de escritorio modernos, la aplicación funcionará de inmediato.
 
 La única dependencia del sistema que comúnmente requiere instalación manual en distribuciones recientes (como Ubuntu 22.04+ o Fedora 38+) es la biblioteca **FUSE (Filesystem in Userspace)** en su versión 2, necesaria para montar el archivo AppImage.
 
-### Guía de Instalación de Dependencias
+### Guía de Instalación de FUSE
 
 <details>
 <summary><strong>Arch Linux / Manjaro</strong></summary>
