@@ -28,7 +28,7 @@
 
 <br>
 <div align="center">
-  <img src="src/renderer/Finbook-logo.png" alt="Captura de pantalla de Finbook" width="400" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+  <img src="src/captura.gif" alt="Captura de pantalla de Finbook" width="1000" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
   <p><em>Organiza tus finanzas con claridad y estilo</em></p>
 </div>
 <br>
