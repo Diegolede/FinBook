@@ -880,9 +880,18 @@ const CreditCards: React.FC = () => {
                           )}
                         </>
                       ) : (
-                        <div className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gray-50 rounded-2xl border border-gray-200">
-                          <CheckCircle className="w-5 h-5 text-gray-600" />
-                          <span className="text-sm font-medium text-gray-700">{t.creditCards.completed}</span>
+                        <div className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 rounded-2xl border border-gray-200">
+                          <div className="flex items-center space-x-2">
+                            <CheckCircle className="w-5 h-5 text-gray-600" />
+                            <span className="text-sm font-medium text-gray-700">{t.creditCards.completed}</span>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteFixedTransaction(transaction)}
+                            className="p-1.5 bg-white text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-gray-200"
+                            title={t.creditCards.delete}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
                       )}
                     </div>
