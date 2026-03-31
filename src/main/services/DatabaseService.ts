@@ -391,28 +391,18 @@ export class DatabaseService {
   private async insertDefaultCategoriesIfNeeded(): Promise<void> {
     const defaultCategories: Omit<Category, 'id'>[] = [
       { name: 'Salario', type: 'income', color: '#10B981' },
-      { name: 'Freelance', type: 'income', color: '#3B82F6' },
+      { name: 'Negocios', type: 'income', color: '#3B82F6' },
       { name: 'Inversiones', type: 'income', color: '#8B5CF6' },
       { name: 'Otros Ingresos', type: 'income', color: '#06B6D4' },
       // Gastos
-      { name: 'Comida', type: 'expense', color: '#F97316' },
-      { name: 'Alimentación', type: 'expense', color: '#EF4444' },
-      { name: 'Transporte', type: 'expense', color: '#F59E0B' },
+      { name: 'Alimentación', type: 'expense', color: '#F97316' },
       { name: 'Vivienda', type: 'expense', color: '#8B5CF6' },
-      { name: 'Entretenimiento', type: 'expense', color: '#EC4899' },
+      { name: 'Transporte', type: 'expense', color: '#F59E0B' },
       { name: 'Salud', type: 'expense', color: '#10B981' },
-      { name: 'Educación', type: 'expense', color: '#3B82F6' },
-      { name: 'Servicios', type: 'expense', color: '#0EA5E9' },
-      { name: 'Supermercado', type: 'expense', color: '#22C55E' },
-      { name: 'Restaurantes', type: 'expense', color: '#E11D48' },
-      { name: 'Hogar', type: 'expense', color: '#7C3AED' },
-      { name: 'Mascotas', type: 'expense', color: '#F59E0B' },
-      { name: 'Impuestos', type: 'expense', color: '#6B7280' },
-      { name: 'Seguro', type: 'expense', color: '#0284C7' },
-      { name: 'Deudas', type: 'expense', color: '#DC2626' },
-      { name: 'Regalos', type: 'expense', color: '#F43F5E' },
-      { name: 'Viajes', type: 'expense', color: '#0EA5E9' },
+      { name: 'Entretenimiento', type: 'expense', color: '#EC4899' },
       { name: 'Compras', type: 'expense', color: '#8B5CF6' },
+      { name: 'Educación', type: 'expense', color: '#3B82F6' },
+      { name: 'Finanzas', type: 'expense', color: '#DC2626' },
       { name: 'Otros Gastos', type: 'expense', color: '#6B7280' },
     ];
 
@@ -436,6 +426,21 @@ export class DatabaseService {
         "UPDATE categories SET type = 'expense' WHERE LOWER(type) IN ('gasto','gastos','egreso','egresos')",
         (err) => (err ? reject(err) : resolve())
       );
+    });
+
+    // Limpiar categorías antiguas para evitar listas largas y confusas
+    const obsoleteCategories = [
+      'Freelance', 'Comida', 'Alimentación', 'Vivienda', 'Entretenimiento', 'Salud', 'Servicios',
+      'Supermercado', 'Restaurantes', 'Hogar', 'Mascotas', 'Impuestos', 'Seguro', 'Deudas', 'Regalos', 'Viajes', 'Compras',
+      // Borrar las temporales generadas previamente
+      'Negocios y Freelance', 'Comida y Supermercado', 'Vivienda y Servicios', 'Salud y Cuidado', 'Entretenimiento y Ocio', 'Compras y Ropa', 'Impuestos y Deudas'
+    ];
+    await new Promise<void>((resolve) => {
+      const placeholders = obsoleteCategories.map(() => '?').join(',');
+      this.db.run(`DELETE FROM categories WHERE name IN (${placeholders})`, obsoleteCategories, (err) => {
+        if (err) console.error('Error cleaning up obsolete categories:', err);
+        resolve();
+      });
     });
 
     // Intentar insertar por defecto siempre; OR IGNORE evita duplicados
@@ -526,24 +531,14 @@ export class DatabaseService {
     // Si no hay categorías de gasto por alguna razón, insertarlas y reintentar
     if (!rows.some((c) => (c.type || '').toLowerCase() === 'expense')) {
       const expenseDefaults: Omit<Category, 'id'>[] = [
-        { name: 'Comida', type: 'expense', color: '#F97316' },
-        { name: 'Alimentación', type: 'expense', color: '#EF4444' },
-        { name: 'Transporte', type: 'expense', color: '#F59E0B' },
+        { name: 'Alimentación', type: 'expense', color: '#F97316' },
         { name: 'Vivienda', type: 'expense', color: '#8B5CF6' },
-        { name: 'Entretenimiento', type: 'expense', color: '#EC4899' },
+        { name: 'Transporte', type: 'expense', color: '#F59E0B' },
         { name: 'Salud', type: 'expense', color: '#10B981' },
-        { name: 'Educación', type: 'expense', color: '#3B82F6' },
-        { name: 'Servicios', type: 'expense', color: '#0EA5E9' },
-        { name: 'Supermercado', type: 'expense', color: '#22C55E' },
-        { name: 'Restaurantes', type: 'expense', color: '#E11D48' },
-        { name: 'Hogar', type: 'expense', color: '#7C3AED' },
-        { name: 'Mascotas', type: 'expense', color: '#F59E0B' },
-        { name: 'Impuestos', type: 'expense', color: '#6B7280' },
-        { name: 'Seguro', type: 'expense', color: '#0284C7' },
-        { name: 'Deudas', type: 'expense', color: '#DC2626' },
-        { name: 'Regalos', type: 'expense', color: '#F43F5E' },
-        { name: 'Viajes', type: 'expense', color: '#0EA5E9' },
+        { name: 'Entretenimiento', type: 'expense', color: '#EC4899' },
         { name: 'Compras', type: 'expense', color: '#8B5CF6' },
+        { name: 'Educación', type: 'expense', color: '#3B82F6' },
+        { name: 'Finanzas', type: 'expense', color: '#DC2626' },
         { name: 'Otros Gastos', type: 'expense', color: '#6B7280' },
       ];
 
