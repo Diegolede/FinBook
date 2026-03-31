@@ -49,6 +49,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Checklist Items (Notas)
   getChecklistItems: () => ipcRenderer.invoke('db-get-checklist-items'),
   addChecklistItem: (text: string) => ipcRenderer.invoke('db-add-checklist-item', text),
+  updateChecklistItem: (id: string, text: string) => ipcRenderer.invoke('db-update-checklist-item', id, text),
   toggleChecklistItem: (id: string, completed: boolean) => ipcRenderer.invoke('db-toggle-checklist-item', id, completed),
   deleteChecklistItem: (id: string) => ipcRenderer.invoke('db-delete-checklist-item', id),
 
@@ -90,6 +91,7 @@ declare global {
       // Checklist Items
       getChecklistItems: () => Promise<any[]>;
       addChecklistItem: (text: string) => Promise<any>;
+      updateChecklistItem: (id: string, text: string) => Promise<void>;
       toggleChecklistItem: (id: string, completed: boolean) => Promise<void>;
       deleteChecklistItem: (id: string) => Promise<void>;
 

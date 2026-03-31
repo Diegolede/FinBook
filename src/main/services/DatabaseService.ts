@@ -854,6 +854,19 @@ export class DatabaseService {
     });
   }
 
+  async updateChecklistItem(id: string, text: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        'UPDATE checklist_items SET text = ? WHERE id = ?',
+        [text, id],
+        function (err) {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
   async toggleChecklistItem(id: string, completed: boolean): Promise<void> {
     return new Promise((resolve, reject) => {
       this.db.run(

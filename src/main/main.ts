@@ -202,6 +202,10 @@ ipcMain.handle('db-add-checklist-item', async (event, text) => {
   return await dbService.addChecklistItem(text);
 });
 
+ipcMain.handle('db-update-checklist-item', async (event, id, text) => {
+  return await dbService.updateChecklistItem(id, text);
+});
+
 ipcMain.handle('db-toggle-checklist-item', async (event, id, completed) => {
   return await dbService.toggleChecklistItem(id, completed);
 });

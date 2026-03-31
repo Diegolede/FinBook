@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Trash2, CheckSquare, Square } from 'lucide-react';
+import { Plus, Trash2, CheckSquare, Square, Edit2 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface ChecklistItem {
@@ -12,6 +12,8 @@ const ChecklistWidget: React.FC = () => {
     const { t } = useLanguage();
     const [items, setItems] = useState<ChecklistItem[]>([]);
     const [newItemText, setNewItemText] = useState('');
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [editingText, setEditingText] = useState('');
     const [loading, setLoading] = useState(true);
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -69,6 +71,30 @@ const ChecklistWidget: React.FC = () => {
         }
     };
 
+    const startEdit = (item: ChecklistItem) => {
+        setEditingId(item.id);
+        setEditingText(item.text);
+    };
+
+    const saveEdit = async (id: string) => {
+        if (!editingText.trim()) {
+            setEditingId(null);
+            return;
+        }
+        try {
+            // Optimistic update
+            setItems(items.map(item =>
+                item.id === id ? { ...item, text: editingText.trim() } : item
+            ));
+            await window.electronAPI.updateChecklistItem(id, editingText.trim());
+            setEditingId(null);
+        } catch (error) {
+            console.error('Error updating checklist item:', error);
+            // Revert on error
+            loadItems();
+        }
+    };
+
     return (
         <div className="bg-white rounded-3xl p-7 shadow-sm border border-gray-200 flex flex-col h-full transition-transform duration-300 ease-in-out hover:shadow-lg hover:scale-[1.02]">
             <div className="flex items-center justify-between mb-4">
@@ -94,24 +120,57 @@ const ChecklistWidget: React.FC = () => {
                             key={item.id}
                             className="group flex items-center justify-between p-2 rounded-xl hover:bg-gray-50 transition-colors duration-200"
                         >
-                            <div
-                                className="flex items-center space-x-3 flex-1 cursor-pointer"
-                                onClick={() => toggleItem(item.id, item.completed)}
-                            >
-                                <div className={`transition-all duration-200 ${item.completed ? 'text-gray-900' : 'text-gray-400 group-hover:text-gray-600'}`}>
-                                    {item.completed ? <CheckSquare className="w-5 h-5" /> : <Square className="w-5 h-5" />}
+                            {editingId === item.id ? (
+                                <div className="flex flex-1 items-center space-x-2 mr-2">
+                                    <input
+                                        type="text"
+                                        value={editingText}
+                                        onChange={(e) => setEditingText(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') saveEdit(item.id);
+                                            if (e.key === 'Escape') setEditingId(null);
+                                        }}
+                                        autoFocus
+                                        className="flex-1 px-3 py-1 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200 text-sm"
+                                    />
+                                    <button
+                                        onClick={() => saveEdit(item.id)}
+                                        className="text-gray-500 hover:text-gray-900 px-2 py-1 bg-gray-100 rounded-lg text-xs font-medium"
+                                    >
+                                        {t.common?.save || "Guardar"}
+                                    </button>
                                 </div>
-                                <span className={`text-sm transition-all duration-200 ${item.completed ? 'text-gray-400 line-through' : 'text-gray-700'}`}>
-                                    {item.text}
-                                </span>
-                            </div>
-                            <button
-                                onClick={() => deleteItem(item.id)}
-                                className="text-gray-300 hover:text-gray-900 opacity-0 group-hover:opacity-100 transition-all duration-200 p-1 rounded-lg hover:bg-gray-100"
-                                title={t.common?.delete || "Eliminar"}
-                            >
-                                <Trash2 className="w-4 h-4" />
-                            </button>
+                            ) : (
+                                <>
+                                    <div
+                                        className="flex items-center space-x-3 flex-1 cursor-pointer"
+                                        onClick={() => toggleItem(item.id, item.completed)}
+                                    >
+                                        <div className={`transition-all duration-200 ${item.completed ? 'text-gray-900' : 'text-gray-400 group-hover:text-gray-600'}`}>
+                                            {item.completed ? <CheckSquare className="w-5 h-5" /> : <Square className="w-5 h-5" />}
+                                        </div>
+                                        <span className={`text-sm transition-all duration-200 ${item.completed ? 'text-gray-400 line-through' : 'text-gray-700'}`}>
+                                            {item.text}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                                        <button
+                                            onClick={() => startEdit(item)}
+                                            className="text-gray-300 hover:text-gray-900 p-1 rounded-lg hover:bg-gray-100"
+                                            title={t.common?.edit || "Editar"}
+                                        >
+                                            <Edit2 className="w-4 h-4" />
+                                        </button>
+                                        <button
+                                            onClick={() => deleteItem(item.id)}
+                                            className="text-gray-300 hover:text-gray-900 p-1 rounded-lg hover:bg-gray-100"
+                                            title={t.common?.delete || "Eliminar"}
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     ))
                 )}
