@@ -57,6 +57,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getMonthlyGoal: (month: string, year: number, type: 'expense' | 'income') => ipcRenderer.invoke('getMonthlyGoal', month, year, type),
   saveMonthlyGoal: (goal: any) => ipcRenderer.invoke('saveMonthlyGoal', goal),
 
+  // Historial Mensual
+  getMonthlyHistory: () => ipcRenderer.invoke('getMonthlyHistory'),
+  exportMonthlyPDF: (data: any) => ipcRenderer.invoke('exportMonthlyPDF', data),
+
   // Utilidades
   getDatabasePath: () => ipcRenderer.invoke('getDatabasePath'),
   quitApp: () => ipcRenderer.invoke('quit-app'),
@@ -97,6 +101,9 @@ declare global {
 
       getMonthlyGoal: (month: string, year: number, type: 'expense' | 'income') => Promise<any | null>;
       saveMonthlyGoal: (goal: any) => Promise<any>;
+      // Historial Mensual
+      getMonthlyHistory: () => Promise<any[]>;
+      exportMonthlyPDF: (data: any) => Promise<{ success: boolean; path?: string }>;
       getDatabasePath: () => Promise<string>;
       quitApp: () => Promise<void>;
     };

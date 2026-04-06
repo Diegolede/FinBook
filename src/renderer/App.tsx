@@ -14,6 +14,7 @@ import Income from './pages/Income';
 import Expenses from './pages/Expenses';
 import CreditCards from './pages/CreditCards';
 import Savings from './pages/Savings';
+import MonthlyHistory from './pages/MonthlyHistory';
 import SettingsModal from './components/Settings';
 import { useLanguage } from './contexts/LanguageContext';
 
@@ -25,7 +26,7 @@ function App() {
 
   // Asegurar que siempre se muestre la home al iniciar
   useEffect(() => {
-    const validRoutes = ['/', '/income', '/expenses', '/credit-cards', '/savings'];
+    const validRoutes = ['/', '/income', '/expenses', '/credit-cards', '/savings', '/history'];
     const currentPath = location.pathname || '/';
     
     // Si la ruta no es válida, está vacía, o es index.html, redirigir a home
@@ -38,7 +39,7 @@ function App() {
   useEffect(() => {
     // Forzar navegación a home al montar si no hay una ruta válida
     const currentPath = location.pathname || '/';
-    const validRoutes = ['/', '/income', '/expenses', '/credit-cards', '/savings'];
+    const validRoutes = ['/', '/income', '/expenses', '/credit-cards', '/savings', '/history'];
     
     if (!validRoutes.includes(currentPath)) {
       navigate('/', { replace: true });
@@ -57,6 +58,7 @@ function App() {
             <Route path="/expenses" element={<Expenses />} />
             <Route path="/credit-cards" element={<CreditCards />} />
             <Route path="/savings" element={<Savings />} />
+            <Route path="/history" element={<MonthlyHistory />} />
             {/* Redirección por defecto a home */}
             <Route path="*" element={<Dashboard />} />
           </Routes>

@@ -14,6 +14,7 @@ import {
   TrendingUp,
   TrendingDown,
   PiggyBank,
+  CalendarDays,
   LogOut,
   Settings,
 } from 'lucide-react';
@@ -35,6 +36,7 @@ const StaticMenu: React.FC<StaticMenuProps> = ({ onOpenSettings }) => {
     { path: '/expenses', icon: TrendingDown, label: t.menu.expenses },
     { path: '/credit-cards', icon: CreditCard, label: t.menu.cards },
     { path: '/savings', icon: PiggyBank, label: t.menu.savings },
+    { path: '/history', icon: CalendarDays, label: t.menu.history },
   ];
 
   return (

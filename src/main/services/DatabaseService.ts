@@ -1000,4 +1000,116 @@ export class DatabaseService {
       );
     });
   }
+
+  /**
+   * Obtiene un historial de resúmenes por mes, calculado dinámicamente
+   * desde las transacciones existentes.
+   */
+  async getMonthlyHistory(): Promise<any[]> {
+    const transactions: Transaction[] = await this.getTransactions();
+    const creditCards: CreditCard[] = await this.getCreditCards();
+
+    // Agrupar por YYYY-MM usando split del string (sin timezone bugs)
+    const months: { [key: string]: Transaction[] } = {};
+    for (const t of transactions) {
+      const monthKey = t.date.substring(0, 7); // 'YYYY-MM'
+      if (!months[monthKey]) months[monthKey] = [];
+      months[monthKey].push(t);
+    }
+
+    const result = Object.entries(months)
+      .sort(([a], [b]) => b.localeCompare(a)) // más reciente primero
+      .map(([monthKey, txs]) => {
+        const incomeTransactions = txs.filter(t => t.type === 'income');
+        const expenseTransactions = txs.filter(t => t.type === 'expense');
+
+        const totalIncome = incomeTransactions.reduce((s, t) => s + t.amount, 0);
+        const totalExpenses = expenseTransactions.reduce((s, t) => s + t.amount, 0);
+        const balance = totalIncome - totalExpenses;
+        const transactionCount = txs.length;
+        const expenseCount = expenseTransactions.length;
+        const avgExpense = expenseCount > 0 ? totalExpenses / expenseCount : 0;
+
+        // Top categorías de gasto
+        const catTotals: { [cat: string]: number } = {};
+        for (const t of expenseTransactions) {
+          catTotals[t.category] = (catTotals[t.category] || 0) + t.amount;
+        }
+        const topCategories = Object.entries(catTotals)
+          .sort(([, a], [, b]) => b - a)
+          .slice(0, 5)
+          .map(([category, amount]) => ({
+            category,
+            amount,
+            percentage: totalExpenses > 0 ? (amount / totalExpenses) * 100 : 0
+          }));
+
+        // Tarjeta más usada
+        const cardTotals: { [cardId: string]: number } = {};
+        for (const t of expenseTransactions) {
+          if (t.creditCardId) {
+            cardTotals[t.creditCardId] = (cardTotals[t.creditCardId] || 0) + t.amount;
+          }
+        }
+        let topCard: { name: string; bank: string; amount: number } | null = null;
+        const cardEntries = Object.entries(cardTotals).sort(([, a], [, b]) => b - a);
+        if (cardEntries.length > 0) {
+          const [cardId, cardAmount] = cardEntries[0];
+          const card = creditCards.find(c => c.id === cardId);
+          topCard = {
+            name: card?.name || 'Desconocida',
+            bank: card?.bank || '',
+            amount: cardAmount
+          };
+        }
+
+        // Top categorías de ingreso
+        const incomeCatTotals: { [cat: string]: number } = {};
+        for (const t of incomeTransactions) {
+          incomeCatTotals[t.category] = (incomeCatTotals[t.category] || 0) + t.amount;
+        }
+        const topIncomeCategories = Object.entries(incomeCatTotals)
+          .sort(([, a], [, b]) => b - a)
+          .slice(0, 3)
+          .map(([category, amount]) => ({
+            category,
+            amount,
+            percentage: totalIncome > 0 ? (amount / totalIncome) * 100 : 0
+          }));
+
+        const savingsTransactions = txs.filter(t => t.category.toLowerCase().includes('ahorro') || t.category.toLowerCase().includes('savings'));
+        const totalSavings = savingsTransactions.reduce((s, t) => s + t.amount, 0);
+
+        return {
+          monthKey,
+          totalIncome,
+          totalExpenses,
+          totalSavings,
+          balance,
+          transactionCount,
+          expenseCount,
+          avgExpense,
+          topCategories,
+          topIncomeCategories,
+          topCard,
+          // Transacciones individuales ordenadas de más nueva a más vieja
+          transactions: txs
+            .sort((a, b) => b.date.localeCompare(a.date))
+            .map(t => ({
+              id: t.id,
+              description: t.description,
+              amount: t.amount,
+              type: t.type,
+              category: t.category,
+              date: t.date,
+              notes: t.notes || '',
+              creditCardId: t.creditCardId || null,
+              creditCardName: t.creditCardId ? (creditCards.find(c => c.id === t.creditCardId)?.name || null) : null,
+              isSavings: t.category.toLowerCase().includes('ahorro') || t.category.toLowerCase().includes('savings')
+            }))
+        };
+      });
+
+    return result;
+  }
 } 

@@ -24,6 +24,7 @@ export interface Translations {
     expenses: string;
     cards: string;
     savings: string;
+    history: string;
     quit: string;
     settings: string;
   };
@@ -354,6 +355,33 @@ export interface Translations {
     loadingReports: string;
   };
 
+  // History
+  history: {
+    title: string;
+    subtitle: string;
+    monthlyHistory: string;
+    selectMonth: string;
+    noHistory: string;
+    noHistoryDescription: string;
+    totalIncome: string;
+    totalExpenses: string;
+    totalSavings: string;
+    balance: string;
+    transactions: string;
+    avgExpense: string;
+    topExpenseCategories: string;
+    topIncomeCategories: string;
+    mostUsedCard: string;
+    exportPDF: string;
+    exporting: string;
+    exportSuccess: string;
+    exportError: string;
+    backToList: string;
+    of: string;
+    monthSummary: string;
+    loadingHistory: string;
+  };
+
   // Transactions
   transactions: {
     title: string;
@@ -450,6 +478,7 @@ const translations: Record<Language, Translations> = {
       expenses: 'Gastos',
       cards: 'Tarjetas',
       savings: 'Ahorros',
+      history: 'Historial',
       quit: 'Salir de la aplicación',
       settings: 'Configuración',
     },
@@ -765,6 +794,31 @@ const translations: Record<Language, Translations> = {
       all: 'Todo',
       loadingReports: 'Cargando reportes...',
     },
+    history: {
+      title: 'Historial',
+      subtitle: 'Resúmenes mensuales de tus finanzas',
+      monthlyHistory: 'Historial mensual',
+      selectMonth: 'Selecciona un mes para ver el resumen',
+      noHistory: 'Sin historial disponible',
+      noHistoryDescription: 'Los resúmenes aparecerán aquí cuando registres transacciones',
+      totalIncome: 'Ingresos totales',
+      totalExpenses: 'Gastos totales',
+      totalSavings: 'Ahorro mensual',
+      balance: 'Balance',
+      transactions: 'Transacciones',
+      avgExpense: 'Gasto promedio',
+      topExpenseCategories: 'Top categorías de gasto',
+      topIncomeCategories: 'Top categorías de ingreso',
+      mostUsedCard: 'Tarjeta más utilizada',
+      exportPDF: 'Exportar PDF',
+      exporting: 'Exportando...',
+      exportSuccess: 'PDF guardado exitosamente',
+      exportError: 'Error al exportar el PDF',
+      backToList: 'Volver al historial',
+      of: 'del total',
+      monthSummary: 'Resumen del mes',
+      loadingHistory: 'Cargando historial...',
+    },
     transactions: {
       title: 'Transacciones',
       subtitle: 'Gestiona tus ingresos y gastos',
@@ -853,6 +907,7 @@ const translations: Record<Language, Translations> = {
       expenses: 'Expenses',
       cards: 'Cards',
       savings: 'Savings',
+      history: 'History',
       quit: 'Quit application',
       settings: 'Settings',
     },
@@ -1167,6 +1222,31 @@ const translations: Record<Language, Translations> = {
       lastYear: 'Last Year',
       all: 'All',
       loadingReports: 'Loading reports...',
+    },
+    history: {
+      title: 'History',
+      subtitle: 'Monthly summaries of your finances',
+      monthlyHistory: 'Monthly history',
+      selectMonth: 'Select a month to view the summary',
+      noHistory: 'No history available',
+      noHistoryDescription: 'Summaries will appear here when you register transactions',
+      totalIncome: 'Total income',
+      totalExpenses: 'Total expenses',
+      totalSavings: 'Monthly savings',
+      balance: 'Balance',
+      transactions: 'Transactions',
+      avgExpense: 'Average expense',
+      topExpenseCategories: 'Top expense categories',
+      topIncomeCategories: 'Top income categories',
+      mostUsedCard: 'Most used card',
+      exportPDF: 'Export PDF',
+      exporting: 'Exporting...',
+      exportSuccess: 'PDF saved successfully',
+      exportError: 'Error exporting PDF',
+      backToList: 'Back to history',
+      of: 'of total',
+      monthSummary: 'Month summary',
+      loadingHistory: 'Loading history...',
     },
     transactions: {
       title: 'Transactions',
