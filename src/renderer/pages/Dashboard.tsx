@@ -9,7 +9,8 @@ import {
   Settings,
   X
 } from 'lucide-react';
-import { format } from 'date-fns';
+
+
 import { formatCurrency } from '../utils/currency';
 import { useLanguage } from '../contexts/LanguageContext';
 import ChecklistWidget from '../components/ChecklistWidget';
@@ -48,9 +49,11 @@ const Dashboard: React.FC = () => {
       ]);
 
       setSummary(summaryData);
-      const sortedByDateDesc = [...transactionsData].sort(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-      );
+      // Ordenar por fecha usando comparación de strings (YYYY-MM-DD) — evita bugs de timezone
+      const sortedByDateDesc = [...transactionsData].sort((a, b) => {
+        if (b.date !== a.date) return b.date.localeCompare(a.date);
+        return 0;
+      });
       setRecentTransactions(sortedByDateDesc.slice(0, 5));
       setAllocation(currentAllocation);
       setMethodTitle(getMethodTitleForAllocation(currentAllocation));
@@ -412,7 +415,8 @@ const Dashboard: React.FC = () => {
                       {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
                     </p>
                     <p className="text-xs text-gray-600">
-                      {format(new Date(transaction.date), 'dd/MM/yyyy')}
+                      {/* Formatear fecha desde string sin usar new Date() para evitar timezone */}
+                      {(() => { const [y, m, d] = transaction.date.split('-'); return `${d}/${m}/${y}`; })()}
                     </p>
                   </div>
                 </div>

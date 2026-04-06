@@ -340,52 +340,52 @@ const CreditCards: React.FC = () => {
   const currentMonth = now.getMonth();
   const currentYear = now.getFullYear();
   
-  // Gastos simples del mes actual
+  // Helpers para parsear fechas sin problemas de zona horaria
+  const getTransactionDate = (dateStr: string) => {
+    const [yearStr, monthStr] = dateStr.split('-');
+    return {
+      year: parseInt(yearStr, 10),
+      month: parseInt(monthStr, 10) - 1 // getMonth() es 0-indexed
+    };
+  };
+
+  // Gastos normales del mes actual
   const currentMonthSimpleExpenses = transactions
-    .filter(t => t.creditCardId) // Solo transacciones de tarjetas de crédito
+    .filter(t => t.creditCardId && (!t.totalInstallments || t.totalInstallments === 1) && !t.isFixedExpense)
     .filter(t => {
-      const transactionDate = new Date(t.date);
-      return transactionDate.getMonth() === currentMonth && 
-             transactionDate.getFullYear() === currentYear &&
-             (!t.totalInstallments || t.totalInstallments === 1); // Gastos simples
+      const { year, month } = getTransactionDate(t.date);
+      return year === currentYear && month === currentMonth;
+    })
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  // Gastos fijos adquiridos hasta el mes actual
+  const fixedExpensesThisMonth = transactions
+    .filter(t => t.creditCardId && t.isFixedExpense)
+    .filter(t => {
+      const { year, month } = getTransactionDate(t.date);
+      return year < currentYear || (year === currentYear && month <= currentMonth);
     })
     .reduce((sum, t) => sum + t.amount, 0);
   
-  // Gastos en cuotas del mes actual (una cuota)
-  const currentMonthInstallmentExpenses = transactions
-    .filter(t => t.creditCardId && t.totalInstallments && t.totalInstallments > 1)
+  // Cuotas correspondientes al mes actual
+  const installmentsThisMonth = transactions
+    .filter(t => t.creditCardId && t.totalInstallments && t.totalInstallments > 1 && !t.isFixedExpense)
     .filter(t => {
-      const transactionDate = new Date(t.date);
-      return transactionDate.getMonth() === currentMonth && 
-             transactionDate.getFullYear() === currentYear;
+      const { year, month } = getTransactionDate(t.date);
+      const paid = t.paidInstallments || 0;
+      const total = t.totalInstallments || 1;
+      
+      const monthsDiff = (currentYear - year) * 12 + (currentMonth - month);
+      
+      // La cuota aplica si:
+      // 1. Ya pasó o es el mes de la compra (monthsDiff >= 0)
+      // 2. No se ha vencido matemáticamente el plazo (monthsDiff < total)
+      // 3. No se ha marcado manualmente como completamente pagada
+      return monthsDiff >= 0 && monthsDiff < total && paid < total;
     })
-    .reduce((sum, t) => sum + (t.amount / t.totalInstallments!), 0);
+    .reduce((sum, t) => sum + (t.amount / (t.totalInstallments || 1)), 0);
   
-  // Cuotas pendientes de gastos anteriores que corresponden al mes actual
-  const pendingInstallmentsThisMonth = transactions
-    .filter(t => t.creditCardId && t.totalInstallments && t.totalInstallments > 1)
-    .filter(t => {
-      const transactionDate = new Date(t.date);
-      const paidInstallments = t.paidInstallments || 0;
-      const totalInstallments = t.totalInstallments || 1;
-      
-      // Calcular cuántos meses han pasado desde la transacción
-      const monthsDiff = (currentYear - transactionDate.getFullYear()) * 12 + 
-                        (currentMonth - transactionDate.getMonth());
-      
-      // La cuota que corresponde al mes actual sería: monthsDiff + 1 (mes 0 = primera cuota)
-      const currentInstallmentNumber = monthsDiff + 1;
-      
-      // Incluir si: la cuota actual no ha sido pagada y está dentro del rango de cuotas totales
-      return currentInstallmentNumber > paidInstallments && 
-             currentInstallmentNumber <= totalInstallments &&
-             monthsDiff >= 0; // Solo meses futuros o actuales
-    })
-    .reduce((sum, t) => sum + (t.amount / t.totalInstallments!), 0);
-  
-  const monthlyExpense = currentMonthSimpleExpenses + 
-                         currentMonthInstallmentExpenses + 
-                         pendingInstallmentsThisMonth;
+  const monthlyExpense = currentMonthSimpleExpenses + fixedExpensesThisMonth + installmentsThisMonth;
 
   const installmentTransactions = transactions.filter(t => t.totalInstallments && t.totalInstallments > 1);
   const totalInstallmentAmount = installmentTransactions.reduce((sum, t) => sum + t.amount, 0);

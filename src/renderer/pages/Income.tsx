@@ -93,6 +93,15 @@ const Income: React.FC = () => {
     return value.replace(/[^\d.]/g, '');
   };
 
+  // Helper para parsear fechas sin problemas de zona horaria
+  const parseDateParts = (dateStr: string) => {
+    const [yearStr, monthStr] = dateStr.split('-');
+    return {
+      year: parseInt(yearStr, 10),
+      month: parseInt(monthStr, 10) - 1 // 0-indexed como getMonth()
+    };
+  };
+
   // Función para eliminar categorías duplicadas
   const removeDuplicateCategories = (categories: Category[]) => {
     const uniqueCategories = categories.filter((category, index, self) => 
@@ -130,11 +139,10 @@ const Income: React.FC = () => {
         const currentMonthNum = now.getMonth();
         const currentYearNum = now.getFullYear();
         
-        // Filtrar transacciones del mes actual
+        // Filtrar transacciones del mes actual (sin bug de timezone)
         const currentMonthTransactions = incomeTransactions.filter(t => {
-          const transactionDate = new Date(t.date);
-          return transactionDate.getMonth() === currentMonthNum && 
-                 transactionDate.getFullYear() === currentYearNum;
+          const { year, month } = parseDateParts(t.date);
+          return month === currentMonthNum && year === currentYearNum;
         });
         
         // Calcular el total de ingresos del mes
@@ -254,11 +262,10 @@ const Income: React.FC = () => {
       const currentMonthNum = now.getMonth();
       const currentYearNum = now.getFullYear();
       
-      // Calcular currentAmount basándose en las transacciones del mes actual
+      // Calcular currentAmount basándose en las transacciones del mes actual (sin bug de timezone)
       const currentMonthTransactions = transactions.filter(t => {
-        const transactionDate = new Date(t.date);
-        return transactionDate.getMonth() === currentMonthNum && 
-               transactionDate.getFullYear() === currentYearNum;
+        const { year, month } = parseDateParts(t.date);
+        return month === currentMonthNum && year === currentYearNum;
       });
       
       const calculatedCurrentAmount = currentMonthTransactions.reduce((sum, t) => sum + t.amount, 0);
@@ -344,8 +351,9 @@ const Income: React.FC = () => {
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   const totalIncome = transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
+  const _now = new Date();
   const monthlyIncome = transactions
-    .filter(t => new Date(t.date).getMonth() === new Date().getMonth())
+    .filter(t => { const { year, month } = parseDateParts(t.date); return month === _now.getMonth() && year === _now.getFullYear(); })
     .reduce((sum, transaction) => sum + transaction.amount, 0);
   const averageIncome = transactions.length > 0 ? totalIncome / transactions.length : 0;
 
