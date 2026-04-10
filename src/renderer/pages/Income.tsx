@@ -594,11 +594,6 @@ const Income: React.FC = () => {
                     <div>
                       <div className="flex items-center space-x-2">
                         <h3 className="font-medium text-gray-900">{transaction.description}</h3>
-                        {transaction.isFixedExpense && (
-                          <span className="text-[10px] font-bold bg-gray-900 text-white px-1.5 py-0.5 rounded uppercase tracking-tighter opacity-80">
-                            Fijo
-                          </span>
-                        )}
                       </div>
                       <p className="text-sm text-gray-500">{transaction.category}</p>
                       {transaction.notes && (

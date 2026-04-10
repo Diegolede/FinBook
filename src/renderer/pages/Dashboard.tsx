@@ -407,11 +407,6 @@ const Dashboard: React.FC = () => {
                     <div>
                       <div className="flex items-center space-x-2">
                         <p className="font-medium text-gray-900">{transaction.description}</p>
-                        {transaction.isFixedExpense && (
-                          <span className="text-[9px] font-bold bg-gray-900 text-white px-1.2 py-0.5 rounded uppercase tracking-tighter opacity-80">
-                            Fijo
-                          </span>
-                        )}
                       </div>
                       <p className="text-sm text-gray-600">{transaction.category}</p>
                     </div>
