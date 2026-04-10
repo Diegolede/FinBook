@@ -1,3 +1,6 @@
+/* stylelint-disable at-rule-no-unknown */
+/* css-validator: ignore */
+
 /**
  * Copyright (c) 2026 FinBook
  * Owner: Diego Ledesma
@@ -6,9 +9,9 @@
  * All rights reserved.
  */
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
 @layer base {
   html {
