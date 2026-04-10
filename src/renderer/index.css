@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2026 FinBook
+ * Owner: Diego Ledesma
+ * 
+ * This file is part of FinBook, a personal finance management application.
+ * All rights reserved.
+ */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
