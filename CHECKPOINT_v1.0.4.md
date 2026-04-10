@@ -1,4 +1,4 @@
-# Checkpoint v1.1.1 - Dashboard Improvements
+# Checkpoint v1.0.4 - Dashboard Improvements
 
 **Fecha**: 2025-12-14
 **Commit**: 22d47e2
@@ -19,7 +19,7 @@
 - ✅ Ahora se muestra: "Ingresos De este mes", "Gastos De este mes", "Saldo De este mes"
 
 ### 3. Actualización de Versión
-- ✅ Versión actualizada de 1.1.0 a 1.1.1
+- ✅ Versión actualizada de 1.0.3 a 1.0.4
 - ✅ Actualizado en `package.json`
 - ✅ Actualizado en traducciones (`i18n.ts`)
 

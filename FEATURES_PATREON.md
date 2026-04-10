@@ -1,4 +1,4 @@
-# 🚀 FinBook v1.1.0 - Lista Completa de Funcionalidades
+# 🚀 FinBook v1.0.5 - Lista Completa de Funcionalidades
 
 ## 📊 **DASHBOARD Y VISIÓN GENERAL**
 
@@ -289,7 +289,7 @@
 ## 🔄 **ACTUALIZACIONES Y MANTENIMIENTO**
 
 ### Versión Actual
-- 📦 **v1.1.0** - Versión estable y funcional con sistema de internacionalización
+- 📦 **v1.0.5** - Versión estable y funcional con sistema de internacionalización
 
 ### Características de Desarrollo
 - 🔧 **Código abierto** (bajo licencia MIT)
@@ -337,6 +337,6 @@
 
 ---
 
-*FinBook v1.1.0 - Desarrollado con ❤️ por Diego Ledesma*
+*FinBook v1.0.5 - Desarrollado con ❤️ por Diego Ledesma*
 
 

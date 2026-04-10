@@ -1,24 +1,24 @@
-MIT License
+# Finbook License Agreement
 
-Copyright (c) 2026 FinBook
-Owner: Diego Ledesma
+Copyright (c) 2026 Diego Ledesma. All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+## 1. Ownership and Attribution
+The software, including its source code, documentation, and graphical assets, is the sole property of **Diego Ledesma** (the "Owner"). Any use of this software must clearly attribute authorship to Diego Ledesma, owner of Finbook.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+## 2. Permitted Use
+You are permitted to download, view, and use this software for personal, non-commercial financial management purposes. You may modify the software for your own personal use.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+## 3. Contributions
+By submitting a Pull Request, issue, or any other contribution to this repository, you agree to grant the Owner a non-exclusive, perpetual, irrevocable, worldwide, royalty-free license to use, reproduce, modify, and distribute your contribution as part of Finbook. You acknowledge that Diego Ledesma is and will remain the sole owner of Finbook and all its derivative works.
 
+## 4. Prohibited Use
+You are strictly prohibited from:
+- **Redistribution**: Distributing copies of the software or its source code to third parties in any form, whether for profit or not.
+- **Cloning/Branding**: Creating derivative works (clones, forks, or versions) of the software for the purpose of redistribution or rebranding under a different name.
+- **Commercial Use**: Using this software for any commercial purpose or distributing it as part of a service without prior written consent from the Owner.
 
+## 5. Termination
+The Owner reserves the right to terminate this license at any time if you violate any of the terms listed above.
+
+## 6. Disclaimer of Warranty
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

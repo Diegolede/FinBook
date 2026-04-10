@@ -27,7 +27,8 @@
     "typescript"
   ],
   "author": "Diego Ledesma",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
+  "private": true,
   "devDependencies": {
     "@types/node": "^20.10.0",
     "@types/react": "^18.2.45",

@@ -1,6 +1,6 @@
 # ✅ CHECKPOINT: Sistema de Internacionalización (i18n)
 **Fecha:** 10 de Diciembre, 2025
-**Versión:** FinBook v1.1.0
+**Versión:** FinBook v1.0.5
 **Estado:** ✅ COMPLETADO Y VERIFICADO
 
 ---
