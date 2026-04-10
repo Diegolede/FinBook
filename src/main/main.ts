@@ -106,15 +106,15 @@ ipcMain.handle('db-get-transactions', async () => {
   return await dbService.getTransactions();
 });
 
-ipcMain.handle('db-add-transaction', async (event, transaction) => {
+ipcMain.handle('db-add-transaction', async (_event, transaction) => {
   return await dbService.addTransaction(transaction);
 });
 
-ipcMain.handle('db-update-transaction', async (event, transaction) => {
+ipcMain.handle('db-update-transaction', async (_event, transaction) => {
   return await dbService.updateTransaction(transaction);
 });
 
-ipcMain.handle('db-delete-transaction', async (event, id) => {
+ipcMain.handle('db-delete-transaction', async (_event, id) => {
   return await dbService.deleteTransaction(id);
 });
 
@@ -122,12 +122,16 @@ ipcMain.handle('db-get-categories', async () => {
   return await dbService.getCategories();
 });
 
-ipcMain.handle('db-add-category', async (event, category) => {
+ipcMain.handle('db-add-category', async (_event, category) => {
   return await dbService.addCategory(category);
 });
 
-ipcMain.handle('db-update-category', async (event, category) => {
+ipcMain.handle('db-update-category', async (_event, category) => {
   return await dbService.updateCategory(category);
+});
+
+ipcMain.handle('db-delete-category', async (event, id) => {
+  return await dbService.deleteCategory(id);
 });
 
 ipcMain.handle('db-get-summary', async () => {
@@ -246,7 +250,7 @@ ipcMain.handle('exportMonthlyPDF', async (_event, data: {
   avgExpense: number;
   topCategories: Array<{ category: string; amount: number; percentage: number }>;
   topIncomeCategories: Array<{ category: string; amount: number; percentage: number }>;
-  topCard: { name: string; bank: string; amount: number } | null;
+  topCards: Array<{ name: string; bank: string; amount: number }>;
   transactions: Array<{
     description: string;
     amount: number;
@@ -256,142 +260,195 @@ ipcMain.handle('exportMonthlyPDF', async (_event, data: {
     creditCardName?: string | null;
     isSavings?: boolean;
   }>;
+  comparisons: {
+    incomeChange: number;
+    expenseChange: number;
+    savingsChange: number;
+    balanceChange: number;
+  };
 }) => {
   const formatMoney = (n: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 2 }).format(n);
 
-  const topCatsHtml = data.topCategories.map((c, i) =>
-    `<tr><td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;">${i + 1}. ${c.category}</td><td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;text-align:right;">${formatMoney(c.amount)}</td><td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;text-align:right;">${c.percentage.toFixed(1)}%</td></tr>`
-  ).join('');
+  const formatPercent = (n: number) => {
+    const abs = Math.abs(n).toFixed(1);
+    const color = '#6b7280';
+    if (n > 0) return `<span style="color:${color}; font-size:9px; font-weight:600;">(+${abs}%)</span>`;
+    if (n < 0) return `<span style="color:${color}; font-size:9px; font-weight:600;">(-${abs}%)</span>`;
+    return '';
+  };
 
-  const topIncomeCatsHtml = data.topIncomeCategories.map((c, i) =>
-    `<tr><td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;">${i + 1}. ${c.category}</td><td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;text-align:right;">${formatMoney(c.amount)}</td><td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;text-align:right;">${c.percentage.toFixed(1)}%</td></tr>`
-  ).join('');
+  const topCatsHtml = data.topCategories.map((c, i) => `
+    <div style="margin-bottom:10px; display:flex; align-items:center; justify-content:space-between;">
+      <div style="flex:1; font-size:11px; font-weight:600; color:#4b5563;">${i + 1}. ${c.category}</div>
+      <div style="width:120px; height:4px; background:#f3f4f6; border-radius:2px; margin:0 15px; overflow:hidden;">
+        <div style="width:${c.percentage}%; height:100%; background:#111; border-radius:2px;"></div>
+      </div>
+      <div style="width:100px; text-align:right; font-weight:700; font-size:11px;">${formatMoney(c.amount)}</div>
+    </div>
+  `).join('');
+
+  const topIncomeCatsHtml = data.topIncomeCategories.map((c, i) => `
+    <div style="margin-bottom:10px; display:flex; align-items:center; justify-content:space-between;">
+      <div style="flex:1; font-size:11px; font-weight:600; color:#4b5563;">${i + 1}. ${c.category}</div>
+      <div style="width:120px; height:4px; background:#f3f4f6; border-radius:2px; margin:0 15px; overflow:hidden;">
+        <div style="width:${c.percentage}%; height:100%; background:#6b7280; border-radius:2px;"></div>
+      </div>
+      <div style="width:100px; text-align:right; font-weight:700; font-size:11px;">${formatMoney(c.amount)}</div>
+    </div>
+  `).join('');
+
+  const cardRowsHtml = data.topCards.map((card) => `
+    <tr>
+      <td style="padding:10px 0; border-bottom:1px solid #f3f4f6;">
+        <div style="font-weight:700; font-size:11px; color:#111;">${card.name.toUpperCase()}</div>
+        <div style="font-size:9px; color:#9ca3af; text-transform:uppercase; letter-spacing:0.5px;">${card.bank}</div>
+      </td>
+      <td style="padding:10px 0; border-bottom:1px solid #f3f4f6; text-align:right; font-weight:700; font-size:11px;">
+        ${formatMoney(card.amount)}
+      </td>
+    </tr>
+  `).join('');
 
   const txsHtml = (data.transactions || []).map((tx) => {
     const [y, mo, d] = tx.date.split('-');
     const dateFormatted = `${d}/${mo}/${y}`;
-    const typeLabel = tx.isSavings ? '💰 Ahorro' : tx.type === 'income' ? '📈 Ingreso' : '📉 Gasto';
+    const typeLabel = tx.isSavings ? 'AHORRO' : tx.type === 'income' ? 'INGRESO' : 'GASTO';
     return `<tr>
-      <td style="padding:8px 12px;border-bottom:1px solid #f3f4f6;font-size:11px;">${dateFormatted}</td>
-      <td style="padding:8px 12px;border-bottom:1px solid #f3f4f6;font-size:11px;">
-        <strong>${tx.description}</strong><br/>
-        <span style="color:#9ca3af;font-size:10px;">${tx.category} ${tx.creditCardName ? '• ' + tx.creditCardName : ''}</span>
+      <td style="padding:10px 12px; border-bottom:1px solid #f3f4f6; font-size:10px; color:#6b7280; font-weight:600;">${dateFormatted}</td>
+      <td style="padding:10px 12px; border-bottom:1px solid #f3f4f6; font-size:10px;">
+        <div style="font-weight:700; color:#111; letter-spacing:-0.2px;">${tx.description.toUpperCase()}</div>
+        <div style="font-size:9px; color:#9ca3af; margin-top:2px; text-transform:uppercase; font-weight:600;">${tx.category} ${tx.creditCardName ? '• ' + tx.creditCardName : ''}</div>
       </td>
-      <td style="padding:8px 12px;border-bottom:1px solid #f3f4f6;font-size:11px;color:#6b7280;">${typeLabel}</td>
-      <td style="padding:8px 12px;border-bottom:1px solid #f3f4f6;font-size:11px;text-align:right;font-weight:700;">
+      <td style="padding:10px 12px; border-bottom:1px solid #f3f4f6; font-size:9px; font-weight:800; color:#939393; text-align:center; letter-spacing:1px;">${typeLabel}</td>
+      <td style="padding:10px 12px; border-bottom:1px solid #f3f4f6; font-size:10px; text-align:right; font-weight:800; color:#111;">
         ${tx.type === 'income' ? '+' : '-'}${formatMoney(tx.amount)}
       </td>
     </tr>`;
   }).join('');
 
-  const cardHtml = data.topCard
-    ? `<div style="margin-top:28px;">
-        <h2 style="font-size:16px;font-weight:700;color:#111;margin-bottom:12px;">💳 Tarjeta más utilizada</h2>
-        <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:16px;display:flex;justify-content:space-between;align-items:center;">
-          <div><strong>${data.topCard.name}</strong><br/><span style="color:#6b7280;font-size:13px;">${data.topCard.bank}</span></div>
-          <div style="font-weight:700;font-size:18px;">${formatMoney(data.topCard.amount)}</div>
-        </div>
-      </div>`
-    : '';
-
   const html = `<!DOCTYPE html>
 <html><head><meta charset="utf-8">
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color:#111; padding:40px; background:#fff; line-height:1.4; }
-  .header { text-align:center; margin-bottom:36px; padding-bottom:20px; border-bottom:2px solid #111; }
-  .header h1 { font-size:28px; font-weight:800; letter-spacing:-0.5px; }
-  .header p { font-size:18px; color:#6b7280; margin-top:6px; }
-  .stats-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; margin-bottom:24px; }
-  .stat-card { background:#f9fafb; border:1px solid #e5e7eb; border-radius:12px; padding:16px; text-align:center; }
-  .stat-card .label { font-size:10px; color:#6b7280; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; font-weight:700; }
-  .stat-card .value { font-size:18px; font-weight:700; }
-  table { width:100%; border-collapse:collapse; }
-  th { text-align:left; padding:8px 12px; font-size:10px; text-transform:uppercase; color:#6b7280; letter-spacing:0.5px; border-bottom:2px solid #111; font-weight:800; }
-  .page-break { page-break-before: always; }
-  .footer { margin-top:40px; padding-top:16px; border-top:1px solid #e5e7eb; text-align:center; color:#9ca3af; font-size:10px; }
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-print-color-adjust: exact; }
+  body { font-family: 'Inter', sans-serif; color:#111; padding:60px 50px; background:#fff; line-height:1.6; }
+  
+  .document-header { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:50px; padding-bottom:20px; border-bottom:1px solid #e5e7eb; }
+  .logo-area h1 { font-size:24px; font-weight:800; letter-spacing:-1px; margin-bottom:2px; }
+  .logo-area p { font-size:10px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:2px; }
+  .period-area { text-align:right; }
+  .period-area div { font-size:9px; font-weight:800; color:#9ca3af; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; }
+  .period-area p { font-size:16px; font-weight:700; color:#111; }
+
+  .summary-title { font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:1px; margin-bottom:15px; color:#111; padding-left:2px; border-left:4px solid #111; line-height:1; }
+  
+  .activity-summary-table { width:100%; margin-bottom:40px; border:1px solid #f3f4f6; border-radius:8px; overflow:hidden; }
+  .activity-summary-table th { background:#f9fafb; padding:12px 15px; font-size:10px; text-transform:uppercase; letter-spacing:1px; color:#6b7280; font-weight:800; border-bottom:1px solid #f3f4f6; }
+  .activity-summary-table td { padding:15px; font-size:14px; font-weight:700; border-bottom:1px solid #f3f4f6; }
+  .activity-summary-table tr:last-child td { border-bottom:none; background:#f9fafb; font-size:16px; }
+
+  .columns-grid { display:grid; grid-template-columns: 1.5fr 1fr; gap:40px; margin-bottom:45px; }
+  
+  .sub-section-title { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:1px; margin-bottom:15px; color:#6b7280; border-bottom:1px solid #f3f4f6; padding-bottom:8px; }
+
+  .transaction-table { width:100%; border-collapse:collapse; }
+  .transaction-table th { text-align:left; padding:12px; font-size:9px; text-transform:uppercase; color:#9ca3af; letter-spacing:1.5px; border-bottom:2px solid #111; font-weight:800; }
+  
+  .footer { margin-top:60px; padding-top:20px; border-top:1px solid #f3f4f6; display:flex; justify-content:space-between; color:#d1d5db; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:1px; }
 </style></head><body>
-  <div class="header">
-    <h1>FINBOOK</h1>
-    <p>Resumen Mensual — ${data.monthLabel}</p>
-  </div>
-
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="label">Ingresos</div>
-      <div class="value">${formatMoney(data.totalIncome)}</div>
+  <div class="document-header">
+    <div class="logo-area">
+      <h1>FINBOOK.</h1>
+      <p>Reporte de Actividad Mensual</p>
     </div>
-    <div class="stat-card">
-      <div class="label">Gastos</div>
-      <div class="value">${formatMoney(data.totalExpenses)}</div>
-    </div>
-    <div class="stat-card">
-      <div class="label">Ahorro</div>
-      <div class="value">${formatMoney(data.totalSavings)}</div>
-    </div>
-    <div class="stat-card">
-      <div class="label">Balance</div>
-      <div class="value">${formatMoney(data.balance)}</div>
+    <div class="period-area">
+      <div>Estado al cierre de</div>
+      <p>${data.monthLabel.toUpperCase()}</p>
     </div>
   </div>
 
-  <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px;">
-    <div class="stat-card">
-      <div class="label">Transacciones</div>
-      <div class="value">${data.transactionCount}</div>
-    </div>
-    <div class="stat-card">
-      <div class="label">Gasto promedio</div>
-      <div class="value">${formatMoney(data.avgExpense)}</div>
-    </div>
-  </div>
+  <div class="summary-title">Resumen de Actividad Económica</div>
+  <table class="activity-summary-table">
+    <thead>
+      <tr>
+        <th style="text-align:left;">Concepto</th>
+        <th style="text-align:right;">Monto Acumulado</th>
+        <th style="text-align:right; width:120px;">Variación</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Ingresos Totales en el Periodo</td>
+        <td style="text-align:right;">${formatMoney(data.totalIncome)}</td>
+        <td style="text-align:right; color:#6b7280;">${formatPercent(data.comparisons.incomeChange) || '—'}</td>
+      </tr>
+      <tr>
+        <td>Gastos y Egresos Registrados</td>
+        <td style="text-align:right;">${formatMoney(data.totalExpenses)}</td>
+        <td style="text-align:right; color:#6b7280;">${formatPercent(data.comparisons.expenseChange) || '—'}</td>
+      </tr>
+      <tr>
+        <td>Capital de Ahorro Neto</td>
+        <td style="text-align:right;">${formatMoney(data.totalSavings)}</td>
+        <td style="text-align:right; color:#6b7280;">${formatPercent(data.comparisons.savingsChange) || '—'}</td>
+      </tr>
+      <tr>
+        <td style="font-weight:800;">Balance de Estado (Cash-Flow)</td>
+        <td style="text-align:right; font-weight:800;">${formatMoney(data.balance)}</td>
+        <td style="text-align:right;">${formatPercent(data.comparisons.balanceChange) || '—'}</td>
+      </tr>
+    </tbody>
+  </table>
 
-  <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
-    ${data.topCategories.length > 0 ? `
+  <div class="columns-grid">
     <div>
-      <h2 style="font-size:14px;font-weight:700;color:#111;margin-bottom:10px;">📉 Top Categorías de Gasto</h2>
-      <table>
-        <thead><tr><th>Categoría</th><th style="text-align:right;">Monto</th></tr></thead>
-        <tbody>${topCatsHtml}</tbody>
-      </table>
-    </div>` : ''}
+      <div class="sub-section-title">Distribución por Categorías</div>
+      <div style="padding:0 5px;">
+        ${topCatsHtml || '<p style="font-size:11px; color:#9ca3af;">No se registraron egresos.</p>'}
+        <div style="margin-top:25px;"></div>
+        ${topIncomeCatsHtml || '<p style="font-size:11px; color:#9ca3af;">No se registraron ingresos.</p>'}
+      </div>
+    </div>
 
-    ${data.topIncomeCategories.length > 0 ? `
     <div>
-      <h2 style="font-size:14px;font-weight:700;color:#111;margin-bottom:10px;">📈 Top Categorías de Ingreso</h2>
-      <table>
-        <thead><tr><th>Categoría</th><th style="text-align:right;">Monto</th></tr></thead>
-        <tbody>${topIncomeCatsHtml}</tbody>
+      <div class="sub-section-title">Análisis de Medios de Pago</div>
+      <table style="width:100%;">
+        <tbody>
+          ${cardRowsHtml || '<tr><td colspan="2" style="font-size:11px; color:#9ca3af; padding:10px 0;">Sin actividad de tarjetas.</td></tr>'}
+        </tbody>
       </table>
-    </div>` : ''}
+      <div style="margin-top:20px; padding:15px; border:1px solid #f3f4f6; border-radius:10px; background:#f9fafb;">
+        <div style="font-size:9px; color:#9ca3af; font-weight:800; text-transform:uppercase; letter-spacing:1px; margin-bottom:5px;">Gasto Promedio Unitario</div>
+        <div style="font-size:18px; font-weight:800; color:#111;">${formatMoney(data.avgExpense)}</div>
+      </div>
+    </div>
   </div>
 
-  ${cardHtml}
+  <div style="page-break-after: always;"></div>
 
-  <div class="page-break"></div>
+  <div class="summary-title" style="margin-top:10px;">Detalle de Movimientos del Periodo</div>
+  <table class="transaction-table">
+    <thead>
+      <tr>
+        <th style="width:90px;">Fecha</th>
+        <th>Descripción del Movimiento</th>
+        <th style="text-align:center; width:90px;">Clase</th>
+        <th style="text-align:right; width:130px;">Importe</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${txsHtml}
+    </tbody>
+  </table>
 
-  <div style="margin-top:20px;">
-    <h2 style="font-size:18px;font-weight:800;color:#111;margin-bottom:16px;border-bottom:2px solid #111;padding-bottom:8px;">📝 Historial Detallado de Transacciones</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Fecha</th>
-          <th>Descripción / Categoría</th>
-          <th>Tipo</th>
-          <th style="text-align:right;">Monto</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${txsHtml}
-      </tbody>
-    </table>
+  <div class="footer">
+    <div>Sello de Validez: Finbook Financial System v1.0.5</div>
+    <div>Página 1 de 1</div>
   </div>
-
-  <div class="footer">Generado por FinBook v1.1.2 — ${new Date().toLocaleDateString('es-AR')}</div>
 </body></html>`;
 
   // Crear ventana oculta para renderizar el HTML
-  const pdfWindow = new BrowserWindow({ show: false, width: 800, height: 600 });
+  const pdfWindow = new BrowserWindow({ show: false, width: 800, height: 1100 });
   pdfWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
 
   // Esperar a que cargue
@@ -401,23 +458,78 @@ ipcMain.handle('exportMonthlyPDF', async (_event, data: {
 
   const pdfBuffer = await pdfWindow.webContents.printToPDF({
     printBackground: true,
-    margins: { top: 0.4, bottom: 0.4, left: 0.4, right: 0.4 }
+    margins: { top: 0, bottom: 0, left: 0, right: 0 },
+    pageSize: 'A4'
   } as any);
 
   pdfWindow.close();
 
   // Mostrar diálogo para guardar
-  const sanitizedMonth = data.monthLabel.replace(/[^a-zA-Z0-9áéíóúñÁÉÍÓÚÑ ]/g, '').replace(/\s+/g, '_');
-  const result = await dialog.showSaveDialog({
-    title: 'Guardar resumen mensual',
-    defaultPath: `Finbook_Resumen_${sanitizedMonth}.pdf`,
-    filters: [{ name: 'PDF', extensions: ['pdf'] }]
+    const sanitizedMonth = data.monthLabel.replace(/[^a-zA-Z0-9áéíóúñÁÉÍÓÚÑ ]/g, '').replace(/\s+/g, '_');
+    const result = await dialog.showSaveDialog({
+      title: 'Guardar resumen mensual',
+      defaultPath: `Finbook_Statement_${sanitizedMonth}.pdf`,
+      filters: [{ name: 'PDF', extensions: ['pdf'] }]
+    });
+
+    if (!result.canceled && result.filePath) {
+      fs.writeFileSync(result.filePath, pdfBuffer);
+      return { success: true, path: result.filePath };
+    }
+
+    return { success: false };
   });
 
-  if (!result.canceled && result.filePath) {
-    fs.writeFileSync(result.filePath, pdfBuffer);
-    return { success: true, path: result.filePath };
-  }
+  ipcMain.handle('backupDatabase', async () => {
+    try {
+      const dbPath = dbService.getDatabasePath();
+      const result = await dialog.showSaveDialog({
+        title: 'Guardar copia de seguridad',
+        defaultPath: `finbook_backup_${new Date().toISOString().split('T')[0]}.db`,
+        filters: [{ name: 'SQLite Database', extensions: ['db'] }]
+      });
 
-  return { success: false };
-}); 
+      if (!result.canceled && result.filePath) {
+        fs.copyFileSync(dbPath, result.filePath);
+        return { success: true };
+      }
+      return { success: false, message: 'Cancelado' };
+    } catch (error: any) {
+      console.error('Error backing up database:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('restoreDatabase', async () => {
+    try {
+      const result = await dialog.showOpenDialog({
+        title: 'Seleccionar copia de seguridad para restaurar',
+        filters: [{ name: 'SQLite Database', extensions: ['db'] }],
+        properties: ['openFile']
+      });
+
+      if (!result.canceled && result.filePaths.length > 0) {
+        const backupPath = result.filePaths[0];
+        const dbPath = dbService.getDatabasePath();
+
+        // Cerrar conexión actual
+        await dbService.close();
+
+        // Sobrescribir archivo
+        fs.copyFileSync(backupPath, dbPath);
+
+        // Re-inicialización ocurrirá al recargar la ventana o podemos reiniciarlo aquí
+        dbService = new DatabaseService();
+        
+        if (mainWindow) {
+          mainWindow.reload();
+        }
+
+        return { success: true };
+      }
+      return { success: false, message: 'Cancelado' };
+    } catch (error: any) {
+      console.error('Error restoring database:', error);
+      return { success: false, error: error.message };
+    }
+  });

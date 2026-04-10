@@ -11,7 +11,6 @@ import {
   ChevronRight,
   PiggyBank,
   Search,
-  Filter,
 } from 'lucide-react';
 import { formatCurrency } from '../utils/currency';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -40,7 +39,7 @@ interface MonthSummary {
   avgExpense: number;
   topCategories: Array<{ category: string; amount: number; percentage: number }>;
   topIncomeCategories: Array<{ category: string; amount: number; percentage: number }>;
-  topCard: { name: string; bank: string; amount: number } | null;
+  topCards: Array<{ name: string; bank: string; amount: number }>;
   transactions: TransactionItem[];
 }
 
@@ -89,6 +88,25 @@ const MonthlyHistory: React.FC = () => {
   const handleExportPDF = async (month: MonthSummary) => {
     setExporting(true);
     try {
+      // Find previous month for comparison
+      const currentIndex = history.findIndex(h => h.monthKey === month.monthKey);
+      const prevMonth = currentIndex < history.length - 1 ? history[currentIndex + 1] : null;
+
+      const comparisons = {
+        incomeChange: prevMonth && prevMonth.totalIncome > 0 
+          ? ((month.totalIncome - prevMonth.totalIncome) / prevMonth.totalIncome) * 100 
+          : 0,
+        expenseChange: prevMonth && prevMonth.totalExpenses > 0 
+          ? ((month.totalExpenses - prevMonth.totalExpenses) / prevMonth.totalExpenses) * 100 
+          : 0,
+        savingsChange: prevMonth && prevMonth.totalSavings > 0 
+          ? ((month.totalSavings - prevMonth.totalSavings) / prevMonth.totalSavings) * 100 
+          : 0,
+        balanceChange: prevMonth && Math.abs(prevMonth.balance) > 0 
+          ? ((month.balance - prevMonth.balance) / Math.abs(prevMonth.balance)) * 100 
+          : 0
+      };
+
       const result = await window.electronAPI.exportMonthlyPDF({
         monthLabel: getMonthLabel(month.monthKey),
         totalIncome: month.totalIncome,
@@ -100,8 +118,9 @@ const MonthlyHistory: React.FC = () => {
         avgExpense: month.avgExpense,
         topCategories: month.topCategories,
         topIncomeCategories: month.topIncomeCategories,
-        topCard: month.topCard,
-        transactions: month.transactions, // New: send all transactions for the PDF
+        topCards: month.topCards,
+        transactions: month.transactions,
+        comparisons
       });
       if (result.success) {
         // Success
@@ -206,7 +225,7 @@ const MonthlyHistory: React.FC = () => {
               </div>
               <p className="text-sm font-medium text-gray-500">{t.history.balance}</p>
             </div>
-            <p className={`text-2xl font-bold ${m.balance >= 0 ? 'text-gray-900' : 'text-red-600'}`}>
+            <p className={`text-2xl font-bold ${m.balance >= 0 ? 'text-gray-900' : 'text-gray-900'}`}>
               {formatCurrency(m.balance)}
             </p>
           </div>
@@ -248,7 +267,7 @@ const MonthlyHistory: React.FC = () => {
             )}
           </div>
 
-          {/* Top categorías de ingreso & Card */}
+          {/* Top categorías de ingreso & Cards */}
           <div className="flex flex-col gap-5">
             <div className="bg-white rounded-3xl p-7 shadow-sm border border-gray-200 flex-1">
                 <div className="flex items-center justify-between mb-6">
@@ -257,7 +276,7 @@ const MonthlyHistory: React.FC = () => {
                 </div>
               {m.topIncomeCategories.length > 0 ? (
                 <div className="space-y-4">
-                  {m.topIncomeCategories.map((cat, i) => (
+                  {m.topIncomeCategories.map((cat) => (
                     <div key={cat.category}>
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-semibold text-gray-700">{cat.category}</span>
@@ -280,21 +299,25 @@ const MonthlyHistory: React.FC = () => {
               )}
             </div>
 
-            {m.topCard && (
-              <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200 flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center">
-                        <CreditCard className="w-6 h-6 text-gray-600" />
+            {m.topCards.length > 0 && (
+              <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200 space-y-4">
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t.history.mostUsedCard}</h3>
+                {m.topCards.slice(0, 3).map((card, idx) => (
+                  <div key={idx} className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                        <div className="w-10 h-10 bg-gray-100 rounded-2xl flex items-center justify-center">
+                            <CreditCard className="w-5 h-5 text-gray-600" />
+                        </div>
+                        <div>
+                            <p className="text-sm font-bold text-gray-900">{card.name}</p>
+                            <p className="text-xs text-gray-500">{card.bank}</p>
+                        </div>
                     </div>
-                    <div>
-                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t.history.mostUsedCard}</p>
-                        <p className="text-base font-bold text-gray-900">{m.topCard.name}</p>
+                    <div className="text-right">
+                        <p className="text-base font-bold text-gray-900">{formatCurrency(card.amount)}</p>
                     </div>
-                </div>
-                <div className="text-right">
-                    <p className="text-lg font-bold text-gray-900">{formatCurrency(m.topCard.amount)}</p>
-                    <p className="text-xs text-gray-500">{m.topCard.bank}</p>
-                </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -314,7 +337,7 @@ const MonthlyHistory: React.FC = () => {
                         <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                         <input 
                             type="text" 
-                            placeholder={t.common.search || "Buscar..."}
+                            placeholder={t.transactions.search || "Buscar..."}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-gray-900 outline-none transition-all w-full md:w-64"
@@ -408,44 +431,41 @@ const MonthlyHistory: React.FC = () => {
       </div>
 
       {history.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="space-y-3">
           {history.map((month) => {
             const isPositive = month.balance >= 0;
             return (
               <div
                 key={month.monthKey}
                 onClick={() => setSelectedMonth(month)}
-                className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200 transition-all duration-300 ease-in-out hover:scale-[1.03] hover:shadow-xl cursor-pointer group"
+                className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 transition-all duration-200 hover:scale-[1.01] hover:shadow-md cursor-pointer group flex items-center justify-between"
               >
-                <div className="flex flex-col h-full">
-                    <div className="flex items-center justify-between mb-6">
-                        <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center group-hover:bg-gray-900 group-hover:text-white transition-all duration-300">
-                            <CalendarDays className="w-6 h-6" />
-                        </div>
-                        <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-gray-900 group-hover:translate-x-1 transition-all" />
+                <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center group-hover:bg-gray-900 group-hover:text-white transition-all duration-300">
+                        <CalendarDays className="w-6 h-6" />
                     </div>
-                    
-                    <div className="mb-8">
-                        <h3 className="text-xl font-bold text-gray-900">{getMonthLabel(month.monthKey)}</h3>
-                        <p className="text-sm text-gray-500">{month.transactionCount} transacciones</p>
+                    <div>
+                        <h3 className="text-lg font-bold text-gray-900">{getMonthLabel(month.monthKey)}</h3>
+                        <p className="text-xs text-gray-400 font-medium uppercase tracking-wider">{month.transactionCount} {language === 'es' ? 'transacciones' : 'transactions'}</p>
                     </div>
+                </div>
 
-                    <div className="mt-auto space-y-3 pt-4 border-t border-gray-50">
-                        <div className="flex justify-between items-center text-xs">
-                            <span className="text-gray-400 font-bold uppercase tracking-wider">Ingresos</span>
-                            <span className="font-bold text-gray-900">+{formatCurrency(month.totalIncome)}</span>
-                        </div>
-                        <div className="flex justify-between items-center text-xs">
-                            <span className="text-gray-400 font-bold uppercase tracking-wider">Gastos</span>
-                            <span className="font-bold text-gray-900">-{formatCurrency(month.totalExpenses)}</span>
-                        </div>
-                        <div className="flex justify-between items-center pt-2">
-                            <span className="text-sm font-bold text-gray-900">Balance</span>
-                            <span className={`text-base font-black ${isPositive ? 'text-gray-900' : 'text-red-600'}`}>
-                                {formatCurrency(month.balance)}
-                            </span>
-                        </div>
+                <div className="flex items-center space-x-8">
+                    <div className="hidden md:flex flex-col items-end">
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">{language === 'es' ? 'Ingresos' : 'Income'}</p>
+                        <p className="text-sm font-bold text-gray-900">+{formatCurrency(month.totalIncome)}</p>
                     </div>
+                    <div className="hidden md:flex flex-col items-end">
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">{language === 'es' ? 'Gastos' : 'Expenses'}</p>
+                        <p className="text-sm font-bold text-gray-900">-{formatCurrency(month.totalExpenses)}</p>
+                    </div>
+                    <div className="flex flex-col items-end min-w-[120px]">
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">Balance</p>
+                        <p className={`text-lg font-black ${isPositive ? 'text-gray-900' : 'text-gray-900'}`}>
+                            {formatCurrency(month.balance)}
+                        </p>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-gray-900 group-hover:translate-x-1 transition-all" />
                 </div>
               </div>
             );

@@ -148,6 +148,15 @@ export class DatabaseService {
     return this.dbPath;
   }
 
+  public close(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.db.close((err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
+  }
+
   private initDatabase() {
     this.db.serialize(() => {
       // Crear tabla de transacciones
@@ -596,46 +605,75 @@ export class DatabaseService {
     });
   }
 
+  async deleteCategory(id: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.db.run('DELETE FROM categories WHERE id = ?', [id], function (err) {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
+  }
+
   async getSummary(): Promise<Summary> {
     return new Promise((resolve, reject) => {
-      // Para gastos en cuotas, solo contar una cuota por mes (amount / totalInstallments)
-      // Para gastos simples (1 cuota o sin cuotas), contar el monto completo
-      this.db.all(`
-        SELECT 
-          SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as totalIncome,
-          SUM(CASE 
-            WHEN type = 'expense' AND totalInstallments > 1 THEN 
-              CAST(amount AS REAL) / CAST(totalInstallments AS REAL)
-            WHEN type = 'expense' THEN 
-              amount
-            ELSE 0 
-          END) as totalExpenses,
-          strftime('%Y-%m', date) as month
-        FROM transactions 
-        GROUP BY strftime('%Y-%m', date)
-        ORDER BY month DESC
-        LIMIT 12
-      `, (err, rows: any[]) => {
+      this.db.all('SELECT * FROM transactions', (err, transactions: any[]) => {
         if (err) {
           reject(err);
           return;
         }
 
-        const totalIncome = rows.reduce((sum, row) => sum + (row.totalIncome || 0), 0);
-        const totalExpenses = rows.reduce((sum, row) => sum + (row.totalExpenses || 0), 0);
-        const balance = totalIncome - totalExpenses;
+        // Obtener los últimos 12 meses
+        const monthlyData: { month: string; income: number; expenses: number }[] = [];
+        const now = new Date();
+        
+        for (let i = 0; i < 12; i++) {
+          const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+          // Usar formato YYYY-MM compatible con strftime('%Y-%m', date)
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          const monthStr = `${year}-${month}`;
+          
+          let monthIncome = 0;
+          let monthExpenses = 0;
 
-        const monthlyData = rows.map(row => ({
-          month: row.month,
-          income: row.totalIncome || 0,
-          expenses: row.totalExpenses || 0
-        }));
+          transactions.forEach(t => {
+            const tMonthStr = t.date.substring(0, 7);
+            
+            // Caso 1: Transacción simple en este mes exacto
+            const isSimple = (!t.isFixedExpense && (!t.totalInstallments || t.totalInstallments <= 1));
+            if (isSimple && tMonthStr === monthStr) {
+              if (t.type === 'income') monthIncome += t.amount;
+              else monthExpenses += t.amount;
+            }
+
+            // Caso 2: Gasto fijo (desde su fecha de creación en adelante)
+            if (t.isFixedExpense) {
+              if (monthStr >= tMonthStr) {
+                if (t.type === 'income') monthIncome += t.amount;
+                else monthExpenses += t.amount;
+              }
+            }
+
+            // Caso 3: Cuotas (Manuales: solo afectan al mes de registro según el deseo del usuario)
+            if (!t.isFixedExpense && t.totalInstallments && t.totalInstallments > 1) {
+              if (tMonthStr === monthStr) {
+                const installmentAmount = t.amount / t.totalInstallments;
+                if (t.type === 'income') monthIncome += installmentAmount;
+                else monthExpenses += installmentAmount;
+              }
+            }
+          });
+
+          monthlyData.push({ month: monthStr, income: monthIncome, expenses: monthExpenses });
+        }
+
+        const currentMonthData = monthlyData[0];
 
         resolve({
-          totalIncome,
-          totalExpenses,
-          balance,
-          monthlyData
+          totalIncome: currentMonthData.income, // Usar solo el mes actual para totales principales si se desea "borrón y cuenta nueva"
+          totalExpenses: currentMonthData.expenses,
+          balance: currentMonthData.income - currentMonthData.expenses,
+          monthlyData: monthlyData.reverse() // De más antiguo a más reciente para el gráfico
         });
       });
     });
@@ -1044,24 +1082,23 @@ export class DatabaseService {
             percentage: totalExpenses > 0 ? (amount / totalExpenses) * 100 : 0
           }));
 
-        // Tarjeta más usada
-        const cardTotals: { [cardId: string]: number } = {};
+        // Tarjetas utilizadas
+        const cardTotalsData: { [cardId: string]: number } = {};
         for (const t of expenseTransactions) {
           if (t.creditCardId) {
-            cardTotals[t.creditCardId] = (cardTotals[t.creditCardId] || 0) + t.amount;
+            cardTotalsData[t.creditCardId] = (cardTotalsData[t.creditCardId] || 0) + t.amount;
           }
         }
-        let topCard: { name: string; bank: string; amount: number } | null = null;
-        const cardEntries = Object.entries(cardTotals).sort(([, a], [, b]) => b - a);
-        if (cardEntries.length > 0) {
-          const [cardId, cardAmount] = cardEntries[0];
-          const card = creditCards.find(c => c.id === cardId);
-          topCard = {
-            name: card?.name || 'Desconocida',
-            bank: card?.bank || '',
-            amount: cardAmount
-          };
-        }
+        const topCards = Object.entries(cardTotalsData)
+          .sort(([, a], [, b]) => b - a)
+          .map(([cardId, cardAmount]) => {
+            const card = creditCards.find(c => c.id === cardId);
+            return {
+              name: card?.name || 'Desconocida',
+              bank: card?.bank || '',
+              amount: cardAmount
+            };
+          });
 
         // Top categorías de ingreso
         const incomeCatTotals: { [cat: string]: number } = {};
@@ -1091,7 +1128,7 @@ export class DatabaseService {
           avgExpense,
           topCategories,
           topIncomeCategories,
-          topCard,
+          topCards,
           // Transacciones individuales ordenadas de más nueva a más vieja
           transactions: txs
             .sort((a, b) => b.date.localeCompare(a.date))

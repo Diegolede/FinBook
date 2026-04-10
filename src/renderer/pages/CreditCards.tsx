@@ -539,7 +539,7 @@ const CreditCards: React.FC = () => {
                       </button>
                       <button
                         onClick={() => handleDeleteCard(card)}
-                        className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                        className="p-1 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
                       >
                         <Trash2 className="w-3 h-3" />
                       </button>
@@ -617,7 +617,7 @@ const CreditCards: React.FC = () => {
                         </button>
                         <button
                           onClick={() => handleDeleteFixedTransaction(transaction)}
-                          className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                          className="p-1 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
                           title={t.creditCards.delete}
                         >
                           <Trash2 className="w-3 h-3" />
@@ -697,7 +697,7 @@ const CreditCards: React.FC = () => {
                         </button>
                         <button
                           onClick={() => handleDeleteFixedTransaction(transaction)}
-                          className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                          className="p-1 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
                           title={t.creditCards.delete}
                         >
                           <Trash2 className="w-3 h-3" />
@@ -887,7 +887,7 @@ const CreditCards: React.FC = () => {
                           </div>
                           <button
                             onClick={() => handleDeleteFixedTransaction(transaction)}
-                            className="p-1.5 bg-white text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-gray-200"
+                            className="p-1.5 bg-white text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200"
                             title={t.creditCards.delete}
                           >
                             <Trash2 className="w-4 h-4" />
@@ -910,10 +910,10 @@ const CreditCards: React.FC = () => {
 
                     {/* Estado de Completado */}
                     {paidInstallments >= totalInstallments && (
-                      <div className="mt-3 p-2 bg-green-50 border border-green-200 rounded-xl">
+                      <div className="mt-3 p-2 bg-gray-50 border border-gray-200 rounded-xl">
                         <div className="flex items-center space-x-2">
-                          <CheckCircle className="w-4 h-4 text-green-600" />
-                          <span className="text-xs font-medium text-green-700">{t.creditCards.paymentCompleted}</span>
+                          <CheckCircle className="w-4 h-4 text-gray-600" />
+                          <span className="text-xs font-medium text-gray-700">{t.creditCards.paymentCompleted}</span>
                         </div>
                       </div>
                     )}
@@ -1056,7 +1056,7 @@ const CreditCards: React.FC = () => {
               <button
                 type="button"
                 onClick={confirmDeleteCard}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors"
+                className="flex-1 px-4 py-2 bg-[#0f0f0f] text-white rounded-xl hover:bg-black transition-all duration-200"
               >
                 {t.creditCards.delete}
               </button>
@@ -1114,7 +1114,7 @@ const CreditCards: React.FC = () => {
               <button
                 type="button"
                 onClick={confirmDeleteFixedTransaction}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors"
+                className="flex-1 px-4 py-2 bg-[#0f0f0f] text-white rounded-xl hover:bg-black transition-all duration-200"
               >
                 {t.creditCards.delete}
               </button>

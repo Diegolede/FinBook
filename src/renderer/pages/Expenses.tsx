@@ -25,6 +25,7 @@ interface Transaction {
   notes?: string;
   creditCardId?: string;
   totalInstallments?: number;
+  isFixedExpense?: boolean;
 }
 
 interface CreditCard {
@@ -173,25 +174,35 @@ const Expenses: React.FC = () => {
       const currentYear = new Date().getFullYear();
       const goal = await window.electronAPI.getMonthlyGoal(currentMonth, currentYear, 'expense');
       
-      // Calcular currentAmount basándose en las transacciones del mes actual
+      // Calcular currentAmount basándose en las transacciones del mes actual + gastos fijos activos
       if (goal) {
         const now = new Date();
         const currentMonthNum = now.getMonth();
         const currentYearNum = now.getFullYear();
+        const currentMonthStr = format(now, 'yyyy-MM');
         
-        // Filtrar transacciones del mes actual (sin bug de timezone)
-        const currentMonthTransactions = expenseTransactions.filter(t => {
+        // Filtrar transacciones que aplican a este mes
+        const applicableTransactions = expenseTransactions.filter(t => {
           const { year, month } = parseDateParts(t.date);
-          return month === currentMonthNum && year === currentYearNum;
+          const tMonthStr = t.date.substring(0, 7);
+          
+          // 1. Transacciones simples del mes actual
+          if (!t.isFixedExpense && year === currentYearNum && month === currentMonthNum) return true;
+          
+          // 2. Gastos fijos (desde su creación en adelante)
+          if (t.isFixedExpense && currentMonthStr >= tMonthStr) return true;
+          
+          return false;
         });
         
-        // Calcular el total: para gastos en cuotas, solo contar una cuota por mes
-        const calculatedCurrentAmount = currentMonthTransactions.reduce((sum, t) => {
-          // Si es un gasto en cuotas (totalInstallments > 1), solo contar una cuota
-          if (t.totalInstallments && t.totalInstallments > 1) {
+        // Calcular el total: para gastos en cuotas, solo contar una cuota por mes (en el mes de compra para gastos simples)
+        const calculatedCurrentAmount = applicableTransactions.reduce((sum, t) => {
+          // Si es un gasto en cuotas Y es del mes actual
+          const { year, month } = parseDateParts(t.date);
+          if (t.totalInstallments && t.totalInstallments > 1 && year === currentYearNum && month === currentMonthNum) {
             return sum + (t.amount / t.totalInstallments);
           }
-          // Para gastos simples, contar el monto completo
+          // Para gastos fijos o simples, contar el monto completo
           return sum + t.amount;
         }, 0);
         
@@ -397,6 +408,19 @@ const Expenses: React.FC = () => {
 
   const filteredTransactions = transactions
     .filter(transaction => {
+      const now = new Date();
+      const currentMonthNum = now.getMonth();
+      const currentYearNum = now.getFullYear();
+      const currentMonthStr = format(now, 'yyyy-MM');
+      const { year, month } = parseDateParts(transaction.date);
+      const tMonthStr = transaction.date.substring(0, 7);
+
+      // Lógica de Persistencia / Borrón y Cuenta Nueva
+      const isCurrentMonthSimple = !transaction.isFixedExpense && year === currentYearNum && month === currentMonthNum;
+      const isActiveFixed = transaction.isFixedExpense && currentMonthStr >= tMonthStr;
+
+      if (!isCurrentMonthSimple && !isActiveFixed) return false;
+
       const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            transaction.category.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = filterCategory === 'all' || transaction.category === filterCategory;
@@ -406,9 +430,20 @@ const Expenses: React.FC = () => {
 
   const totalExpenses = transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
   const _now = new Date();
+  const _currentMonthStr = format(_now, 'yyyy-MM');
   const monthlyExpenses = transactions
-    .filter(t => { const { year, month } = parseDateParts(t.date); return month === _now.getMonth() && year === _now.getFullYear(); })
-    .reduce((sum, transaction) => sum + transaction.amount, 0);
+    .filter(t => { 
+      const { year, month } = parseDateParts(t.date); 
+      const tMonthStr = t.date.substring(0, 7);
+      return (month === _now.getMonth() && year === _now.getFullYear() && !t.isFixedExpense) || (t.isFixedExpense && _currentMonthStr >= tMonthStr);
+    })
+    .reduce((sum, t) => {
+      // Ajuste para cuotas en el mes de compra
+      if (t.totalInstallments && t.totalInstallments > 1 && !t.isFixedExpense) {
+        return sum + (t.amount / t.totalInstallments);
+      }
+      return sum + t.amount;
+    }, 0);
   const averageExpense = transactions.length > 0 ? totalExpenses / transactions.length : 0;
 
   const goalProgress = monthlyGoal ? (monthlyGoal.currentAmount / monthlyGoal.targetAmount) * 100 : 0;
@@ -653,7 +688,14 @@ const Expenses: React.FC = () => {
                       <TrendingDown className="w-5 h-5 text-gray-600" />
                     </div>
                     <div>
-                      <h3 className="font-medium text-gray-900">{transaction.description}</h3>
+                      <div className="flex items-center space-x-2">
+                        <h3 className="font-medium text-gray-900">{transaction.description}</h3>
+                        {transaction.isFixedExpense && (
+                          <span className="text-[10px] font-bold bg-gray-900 text-white px-1.5 py-0.5 rounded uppercase tracking-tighter opacity-80">
+                            Fijo
+                          </span>
+                        )}
+                      </div>
                       <p className="text-sm text-gray-500">{transaction.category}</p>
                       {transaction.notes && (
                         <p className="text-xs text-gray-400 mt-1">{transaction.notes}</p>
@@ -693,7 +735,7 @@ const Expenses: React.FC = () => {
                       </button>
                       <button
                         onClick={() => handleDelete(transaction)}
-                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -1041,7 +1083,7 @@ const Expenses: React.FC = () => {
               <button
                 type="button"
                 onClick={confirmDelete}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors"
+                className="flex-1 px-4 py-2 bg-[#0f0f0f] text-white rounded-xl hover:bg-black transition-all duration-200"
               >
                 {t.expenses.delete}
               </button>

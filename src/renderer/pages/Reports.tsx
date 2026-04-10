@@ -4,16 +4,12 @@ import {
   TrendingDown, 
   BarChart3,
   Calendar,
-  DollarSign,
-  PieChart,
-  LineChart,
-  Filter
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es, enUS } from 'date-fns/locale';
 import { formatCurrency } from '../utils/currency';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Bar, Doughnut, Line } from 'react-chartjs-2';
+import { Bar, Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -159,14 +155,14 @@ const Reports: React.FC = () => {
         {
           label: t.reports.income,
           data: sortedMonths.map(month => monthlyTotals[month].income),
-          backgroundColor: '#10B981',
-          borderColor: '#10B981',
+          backgroundColor: '#111827',
+          borderColor: '#111827',
         },
         {
           label: t.reports.expenses,
           data: sortedMonths.map(month => monthlyTotals[month].expenses),
-          backgroundColor: '#EF4444',
-          borderColor: '#EF4444',
+          backgroundColor: '#6b7280',
+          borderColor: '#6b7280',
         }
       ]
     };

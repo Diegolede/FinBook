@@ -22,6 +22,7 @@ interface Transaction {
   category: string;
   date: string;
   notes?: string;
+  isFixedExpense?: boolean;
 }
 
 interface Category {
@@ -61,7 +62,8 @@ const Income: React.FC = () => {
     amount: '',
     category: '',
     date: format(new Date(), 'yyyy-MM-dd'),
-    notes: ''
+    notes: '',
+    isFixedExpense: false
   });
 
   const [goalFormData, setGoalFormData] = useState({
@@ -71,38 +73,29 @@ const Income: React.FC = () => {
 
   // Función para formatear números mientras se escribe
   const formatNumberInput = (value: string) => {
-    // Remover todos los caracteres no numéricos excepto el punto decimal
     const cleanValue = value.replace(/[^\d.]/g, '');
-    
-    // Asegurar que solo haya un punto decimal
     const parts = cleanValue.split('.');
     if (parts.length > 2) {
       return parts[0] + '.' + parts.slice(1).join('');
     }
-    
-    // Formatear la parte entera con separadores de miles
     if (parts[0]) {
       parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     }
-    
     return parts.join('.');
   };
 
-  // Función para limpiar el formato y obtener solo números
   const cleanNumberValue = (value: string) => {
     return value.replace(/[^\d.]/g, '');
   };
 
-  // Helper para parsear fechas sin problemas de zona horaria
   const parseDateParts = (dateStr: string) => {
     const [yearStr, monthStr] = dateStr.split('-');
     return {
       year: parseInt(yearStr, 10),
-      month: parseInt(monthStr, 10) - 1 // 0-indexed como getMonth()
+      month: parseInt(monthStr, 10) - 1
     };
   };
 
-  // Función para eliminar categorías duplicadas
   const removeDuplicateCategories = (categories: Category[]) => {
     const uniqueCategories = categories.filter((category, index, self) => 
       index === self.findIndex(c => c.name.toLowerCase() === category.name.toLowerCase())
@@ -123,7 +116,6 @@ const Income: React.FC = () => {
       
       const incomeTransactions = transactionsData.filter(t => t.type === 'income');
       const incomeCategories = categoriesData.filter(c => (c.type || '').toLowerCase() === 'income');
-      
       const uniqueIncomeCategories = removeDuplicateCategories(incomeCategories);
       
       setTransactions(incomeTransactions);
@@ -133,22 +125,22 @@ const Income: React.FC = () => {
       const currentYear = new Date().getFullYear();
       const goal = await window.electronAPI.getMonthlyGoal(currentMonth, currentYear, 'income');
       
-      // Calcular currentAmount basándose en las transacciones del mes actual
       if (goal) {
         const now = new Date();
         const currentMonthNum = now.getMonth();
         const currentYearNum = now.getFullYear();
+        const currentMonthStr = format(now, 'yyyy-MM');
         
-        // Filtrar transacciones del mes actual (sin bug de timezone)
-        const currentMonthTransactions = incomeTransactions.filter(t => {
+        const applicableTransactions = incomeTransactions.filter(t => {
           const { year, month } = parseDateParts(t.date);
-          return month === currentMonthNum && year === currentYearNum;
+          const tMonthStr = t.date.substring(0, 7);
+          if (!t.isFixedExpense && year === currentYearNum && month === currentMonthNum) return true;
+          if (t.isFixedExpense && currentMonthStr >= tMonthStr) return true;
+          return false;
         });
         
-        // Calcular el total de ingresos del mes
-        const calculatedCurrentAmount = currentMonthTransactions.reduce((sum, t) => sum + t.amount, 0);
+        const calculatedCurrentAmount = applicableTransactions.reduce((sum, t) => sum + t.amount, 0);
         
-        // Actualizar la meta con el currentAmount calculado
         if (goal.currentAmount !== calculatedCurrentAmount) {
           const updatedGoal = {
             ...goal,
@@ -172,18 +164,15 @@ const Income: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     const amount = parseFloat(cleanNumberValue(formData.amount));
     if (isNaN(amount) || amount <= 0) {
       alert(`${t.common.pleaseEnter} ${t.common.validAmount} ${t.common.greaterThanZero}.`);
       return;
     }
-    
     if (!formData.description.trim()) {
       alert(`${t.common.pleaseEnter} una descripción.`);
       return;
     }
-    
     if (!formData.category) {
       alert(`${t.common.pleaseSelect} ${t.common.category}.`);
       return;
@@ -204,7 +193,6 @@ const Income: React.FC = () => {
       } else {
         await window.electronAPI.addTransaction(transactionData);
       }
-      
       await loadData();
       handleCloseForm();
     } catch (error) {
@@ -218,7 +206,6 @@ const Income: React.FC = () => {
       alert(`${t.common.pleaseEnter} ${t.common.validAmount} ${t.common.greaterThanZero}.`);
       return;
     }
-    
     const transactionData = {
       description,
       amount,
@@ -227,7 +214,6 @@ const Income: React.FC = () => {
       date: format(new Date(), 'yyyy-MM-dd'),
       notes: 'Ingreso agregado desde acciones rápidas'
     };
-
     try {
       await window.electronAPI.addTransaction(transactionData);
       await loadData();
@@ -250,25 +236,22 @@ const Income: React.FC = () => {
 
   const handleGoalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     const targetAmount = parseFloat(cleanNumberValue(goalFormData.targetAmount));
     if (isNaN(targetAmount) || targetAmount <= 0) {
       alert(`${t.common.pleaseEnter} un monto objetivo válido ${t.common.greaterThanZero}.`);
       return;
     }
-    
     try {
       const now = new Date();
       const currentMonthNum = now.getMonth();
       const currentYearNum = now.getFullYear();
+      const currentMonthStr = format(now, 'yyyy-MM');
       
-      // Calcular currentAmount basándose en las transacciones del mes actual (sin bug de timezone)
-      const currentMonthTransactions = transactions.filter(t => {
+      const calculatedCurrentAmount = transactions.filter(t => {
         const { year, month } = parseDateParts(t.date);
-        return month === currentMonthNum && year === currentYearNum;
-      });
-      
-      const calculatedCurrentAmount = currentMonthTransactions.reduce((sum, t) => sum + t.amount, 0);
+        const tMonthStr = t.date.substring(0, 7);
+        return (month === currentMonthNum && year === currentYearNum && !t.isFixedExpense) || (t.isFixedExpense && currentMonthStr >= tMonthStr);
+      }).reduce((sum, t) => sum + t.amount, 0);
       
       const goalData = {
         targetAmount,
@@ -324,7 +307,8 @@ const Income: React.FC = () => {
       amount: transaction.amount.toString(),
       category: transaction.category,
       date: transaction.date,
-      notes: transaction.notes || ''
+      notes: transaction.notes || '',
+      isFixedExpense: transaction.isFixedExpense || false
     });
     setShowForm(true);
   };
@@ -337,12 +321,25 @@ const Income: React.FC = () => {
       amount: '',
       category: '',
       date: format(new Date(), 'yyyy-MM-dd'),
-      notes: ''
+      notes: '',
+      isFixedExpense: false
     });
   };
 
   const filteredTransactions = transactions
     .filter(transaction => {
+      const now = new Date();
+      const currentMonthNum = now.getMonth();
+      const currentYearNum = now.getFullYear();
+      const currentMonthStr = format(now, 'yyyy-MM');
+      const { year, month } = parseDateParts(transaction.date);
+      const tMonthStr = transaction.date.substring(0, 7);
+
+      const isCurrentMonthSimple = !transaction.isFixedExpense && year === currentYearNum && month === currentMonthNum;
+      const isActiveFixed = transaction.isFixedExpense && currentMonthStr >= tMonthStr;
+
+      if (!isCurrentMonthSimple && !isActiveFixed) return false;
+
       const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            transaction.category.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = filterCategory === 'all' || transaction.category === filterCategory;
@@ -352,11 +349,15 @@ const Income: React.FC = () => {
 
   const totalIncome = transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
   const _now = new Date();
+  const _currentMonthStr = format(_now, 'yyyy-MM');
   const monthlyIncome = transactions
-    .filter(t => { const { year, month } = parseDateParts(t.date); return month === _now.getMonth() && year === _now.getFullYear(); })
+    .filter(t => { 
+      const { year, month } = parseDateParts(t.date); 
+      const tMonthStr = t.date.substring(0, 7);
+      return (month === _now.getMonth() && year === _now.getFullYear() && !t.isFixedExpense) || (t.isFixedExpense && _currentMonthStr >= tMonthStr);
+    })
     .reduce((sum, transaction) => sum + transaction.amount, 0);
   const averageIncome = transactions.length > 0 ? totalIncome / transactions.length : 0;
-
   const goalProgress = monthlyGoal ? (monthlyGoal.currentAmount / monthlyGoal.targetAmount) * 100 : 0;
 
   if (loading) {
@@ -372,13 +373,11 @@ const Income: React.FC = () => {
 
   return (
     <div className="pt-8 pb-6 px-6 space-y-6 max-w-[90rem] mx-auto relative z-10">
-      {/* Título de la sección */}
       <div className="mb-2">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">{t.income.title}</h1>
         <p className="text-sm text-gray-600">{t.income.subtitle}</p>
       </div>
 
-      {/* Header con estadísticas principales */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         <div className="bg-white rounded-3xl p-7 shadow-sm border border-gray-200 transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg">
           <div className="flex items-center justify-between mb-5">
@@ -426,11 +425,8 @@ const Income: React.FC = () => {
         </div>
       </div>
 
-      {/* Bento Grid Principal */}
       <div className="space-y-4">
-        {/* Fila 2: Acciones Rápidas + Meta Mensual */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          {/* Acciones Rápidas */}
           <div className="bg-white rounded-3xl px-5 pt-8 pb-5 shadow-sm border border-gray-200 transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg flex flex-col">
             <h3 className="text-base font-semibold text-gray-900 mb-6">{t.income.quickActions}</h3>
             <div className="space-y-2">
@@ -462,12 +458,11 @@ const Income: React.FC = () => {
                 </div>
               </button>
               
-              {/* Ingreso rápido con input */}
               <div className="space-y-2">
                 <div className="flex items-center space-x-2 p-3 bg-white rounded-2xl border border-gray-200">
-                                      <div className="w-8 h-8 bg-gray-100 rounded-xl flex items-center justify-center">
-                      <TrendingUp className="w-4 h-4 text-gray-600" />
-                    </div>
+                  <div className="w-8 h-8 bg-gray-100 rounded-xl flex items-center justify-center">
+                    <TrendingUp className="w-4 h-4 text-gray-600" />
+                  </div>
                   <div className="flex-1">
                     <input
                       type="text"
@@ -490,7 +485,6 @@ const Income: React.FC = () => {
             </div>
           </div>
 
-          {/* Meta Mensual */}
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200 transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-gray-900">{t.income.monthlyIncomeGoal}</h3>
@@ -551,7 +545,6 @@ const Income: React.FC = () => {
           </div>
         </div>
 
-        {/* Fila 3: Historial de Ingresos */}
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200 transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg">
           <div className="flex flex-col md:flex-row gap-4 mb-6">
             <div className="flex-1 relative">
@@ -583,13 +576,13 @@ const Income: React.FC = () => {
                   setFilterCategory('all');
                 }}
                 className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
+                title="Limpiar filtros"
               >
-                                  <Edit className="w-4 h-4" />
+                <X className="w-4 h-4" />
               </button>
             </div>
           </div>
 
-          {/* Lista de Ingresos */}
           <div className="space-y-3">
             {filteredTransactions.length > 0 ? (
               filteredTransactions.map((transaction) => (
@@ -599,7 +592,14 @@ const Income: React.FC = () => {
                       <TrendingUp className="w-5 h-5 text-gray-600" />
                     </div>
                     <div>
-                      <h3 className="font-medium text-gray-900">{transaction.description}</h3>
+                      <div className="flex items-center space-x-2">
+                        <h3 className="font-medium text-gray-900">{transaction.description}</h3>
+                        {transaction.isFixedExpense && (
+                          <span className="text-[10px] font-bold bg-gray-900 text-white px-1.5 py-0.5 rounded uppercase tracking-tighter opacity-80">
+                            Fijo
+                          </span>
+                        )}
+                      </div>
                       <p className="text-sm text-gray-500">{transaction.category}</p>
                       {transaction.notes && (
                         <p className="text-xs text-gray-400 mt-1">{transaction.notes}</p>
@@ -626,7 +626,7 @@ const Income: React.FC = () => {
                       </button>
                       <button
                         onClick={() => handleDelete(transaction)}
-                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -645,18 +645,12 @@ const Income: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal de Meta Mensual */}
       {showGoalModal && (
-        <div className="fixed -top-1 -left-1 -right-1 -bottom-1 w-[calc(100%+2px)] h-[calc(100%+2px)] bg-[#0f0f0f] bg-opacity-50 flex items-center justify-center z-[9999] m-0 p-0" style={{ margin: 0, padding: 0 }}>
+        <div className="fixed -top-1 -left-1 -right-1 -bottom-1 w-[calc(100%+2px)] h-[calc(100%+2px)] bg-[#0f0f0f] bg-opacity-50 flex items-center justify-center z-[9999] m-0 p-0">
           <div className="bg-white rounded-3xl p-6 w-full max-w-md mx-4 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-900">
-                {t.income.incomeGoal}
-              </h2>
-              <button
-                onClick={handleCloseGoalModal}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-              >
+              <h2 className="text-xl font-bold text-gray-900">{t.income.incomeGoal}</h2>
+              <button onClick={handleCloseGoalModal} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -665,19 +659,12 @@ const Income: React.FC = () => {
               <div className="mb-6 p-4 bg-gray-50 rounded-2xl">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-gray-700">Progreso actual</span>
-                  <span className="text-sm text-gray-500">
-                    {formatCurrency(monthlyGoal.currentAmount)} / {formatCurrency(monthlyGoal.targetAmount)}
-                  </span>
+                  <span className="text-sm text-gray-500">{formatCurrency(monthlyGoal.currentAmount)} / {formatCurrency(monthlyGoal.targetAmount)}</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-gray-900 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${Math.min(goalProgress, 100)}%` }}
-                  ></div>
+                  <div className="bg-gray-900 h-2 rounded-full transition-all duration-300" style={{ width: `${Math.min(goalProgress, 100)}%` }}></div>
                 </div>
-                <p className="text-xs text-gray-500 mt-2">
-                  {goalProgress.toFixed(1)}% completado
-                </p>
+                <p className="text-xs text-gray-500 mt-2">{goalProgress.toFixed(1)}% completado</p>
               </div>
             )}
             
@@ -690,60 +677,38 @@ const Income: React.FC = () => {
                 <input
                   type="text"
                   required
-                    value={goalFormData.targetAmount}
-                    onChange={(e) => setGoalFormData({...goalFormData, targetAmount: formatNumberInput(e.target.value)})}
-                    className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                  value={goalFormData.targetAmount}
+                  onChange={(e) => setGoalFormData({...goalFormData, targetAmount: formatNumberInput(e.target.value)})}
+                  className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                   placeholder={t.common.numbersOnly}
                 />
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Notas (opcional)
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Notas (opcional)</label>
                 <textarea
-                    value={goalFormData.notes}
-                    onChange={(e) => setGoalFormData({...goalFormData, notes: e.target.value})}
-                    className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                  value={goalFormData.notes}
+                  onChange={(e) => setGoalFormData({...goalFormData, notes: e.target.value})}
+                  className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                   rows={3}
                   placeholder={t.income.additionalInfo}
                 />
               </div>
-
               <div className="flex space-x-3 pt-4">
-                <button
-                  type="button"
-                  onClick={handleCloseGoalModal}
-                  className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
-                >
-                  {t.income.cancel}
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 px-4 py-2 bg-[#0f0f0f] text-white rounded-xl hover:bg-gray-800 transition-colors"
-                >
-                  {t.income.save} {t.income.monthlyGoal}
-                </button>
+                <button type="button" onClick={handleCloseGoalModal} className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors">{t.income.cancel}</button>
+                <button type="submit" className="flex-1 px-4 py-2 bg-[#0f0f0f] text-white rounded-xl hover:bg-gray-800 transition-colors">{t.income.save} {t.income.monthlyGoal}</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* Modal de Formulario */}
       {showForm && (
-        <div className="fixed -top-1 -left-1 -right-1 -bottom-1 w-[calc(100%+2px)] h-[calc(100%+2px)] bg-[#0f0f0f] bg-opacity-50 flex items-center justify-center z-[9999] m-0 p-0" style={{ margin: 0, padding: 0 }}>
+        <div className="fixed -top-1 -left-1 -right-1 -bottom-1 w-[calc(100%+2px)] h-[calc(100%+2px)] bg-[#0f0f0f] bg-opacity-50 flex items-center justify-center z-[9999] m-0 p-0">
           <div className="bg-white rounded-3xl p-6 w-full max-w-md mx-4 shadow-2xl">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
-              {editingTransaction ? t.income.editIncome : t.income.newIncomeForm}
-            </h2>
-            
+            <h2 className="text-xl font-bold text-gray-900 mb-4">{editingTransaction ? t.income.editIncome : t.income.newIncomeForm}</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t.income.description}
-                  <span className="text-xs text-gray-500 ml-1">{t.income.origin}</span>
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t.income.description}<span className="text-xs text-gray-500 ml-1">{t.income.origin}</span></label>
                 <input
                   type="text"
                   required
@@ -753,12 +718,8 @@ const Income: React.FC = () => {
                   placeholder={`${t.common.example} ${language === 'es' ? 'Salario mensual, trabajo freelance, venta de producto...' : 'Monthly salary, freelance work, product sale...'}`}
                 />
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t.income.amount}
-                  <span className="text-xs text-gray-500 ml-1">{t.income.amountReceived}</span>
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t.income.amount}<span className="text-xs text-gray-500 ml-1">{t.income.amountReceived}</span></label>
                 <input
                   type="text"
                   required
@@ -768,11 +729,8 @@ const Income: React.FC = () => {
                   placeholder={t.common.numbersOnly}
                 />
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t.income.category}
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t.income.category}</label>
                 <select
                   required
                   value={formData.category}
@@ -781,17 +739,12 @@ const Income: React.FC = () => {
                 >
                   <option value="">{t.income.selectCategory}</option>
                   {categories.map(category => (
-                    <option key={category.id} value={category.name}>
-                      {category.name}
-                    </option>
+                    <option key={category.id} value={category.name}>{category.name}</option>
                   ))}
                 </select>
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t.income.date}
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t.income.date}</label>
                 <input
                   type="date"
                   required
@@ -800,11 +753,20 @@ const Income: React.FC = () => {
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                 />
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Notas (opcional)
+              <div className="flex items-center space-x-2 py-2">
+                <input
+                  type="checkbox"
+                  id="isFixedExpense"
+                  checked={formData.isFixedExpense}
+                  onChange={(e) => setFormData({...formData, isFixedExpense: e.target.checked})}
+                  className="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-500"
+                />
+                <label htmlFor="isFixedExpense" className="text-sm font-medium text-gray-700">
+                  {t.creditCards?.fixedExpense || 'Ingreso Fijo (Se repite cada mes)'}
                 </label>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Notas (opcional)</label>
                 <textarea
                   value={formData.notes}
                   onChange={(e) => setFormData({...formData, notes: e.target.value})}
@@ -813,82 +775,26 @@ const Income: React.FC = () => {
                   placeholder={t.income.additionalInfo}
                 />
               </div>
-
               <div className="flex space-x-3 pt-4">
-                <button
-                  type="button"
-                  onClick={handleCloseForm}
-                  className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
-                >
-                  {t.income.cancel}
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 px-4 py-2 bg-[#0f0f0f] text-white rounded-xl hover:bg-gray-800 transition-colors"
-                >
-                  {editingTransaction ? t.income.update : t.income.save}
-                </button>
+                <button type="button" onClick={handleCloseForm} className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors">{t.income.cancel}</button>
+                <button type="submit" className="flex-1 px-4 py-2 bg-[#0f0f0f] text-white rounded-xl hover:bg-gray-800 transition-colors">{editingTransaction ? (t.common.save || 'Guardar') : (t.common.add || 'Agregar')}</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* Modal de Eliminación */}
       {showDeleteModal && (
-        <div className="fixed -top-1 -left-1 -right-1 -bottom-1 w-[calc(100%+2px)] h-[calc(100%+2px)] bg-[#0f0f0f] bg-opacity-50 flex items-center justify-center z-[9999] m-0 p-0" style={{ margin: 0, padding: 0 }}>
-          <div className="bg-white rounded-3xl p-6 w-full max-w-md mx-4 shadow-2xl">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-gray-900">
-                {t.income.confirmDelete}
-              </h2>
-              <button
-                onClick={cancelDelete}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
+        <div className="fixed -top-1 -left-1 -right-1 -bottom-1 w-[calc(100%+2px)] h-[calc(100%+2px)] bg-[#0f0f0f] bg-opacity-50 flex items-center justify-center z-[9999] m-0 p-0">
+          <div className="bg-white rounded-3xl p-8 w-full max-w-md mx-4 shadow-2xl text-center">
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Trash2 className="w-10 h-10 text-gray-900" />
             </div>
-
-            <div className="mb-6">
-              <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-2xl border border-gray-200">
-                <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-gray-600" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-medium text-gray-900">{transactionToDelete?.description}</h3>
-                  <p className="text-sm text-gray-500">{transactionToDelete?.category}</p>
-                  <p className="text-xs text-gray-400">
-                    {transactionToDelete && format(new Date(transactionToDelete.date), 'dd/MM/yyyy', { locale: language === 'es' ? es : enUS })}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold text-gray-700">
-                    +{transactionToDelete && formatCurrency(transactionToDelete.amount)}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <p className="text-gray-700 mb-6">
-              {t.income.deletePermanently}
-            </p>
-
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">{t.income.confirmDelete}</h2>
+            <p className="text-gray-600 mb-8">{t.income.confirmDeleteMsg || '¿Estás seguro de que deseas eliminar este ingreso?'}</p>
             <div className="flex space-x-3">
-              <button
-                type="button"
-                onClick={cancelDelete}
-                className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
-              >
-                {t.income.cancel}
-              </button>
-              <button
-                type="button"
-                onClick={confirmDelete}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors"
-              >
-                {t.income.delete}
-              </button>
+              <button onClick={cancelDelete} className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-2xl hover:bg-gray-200 transition-all duration-200">{t.income.cancel}</button>
+              <button onClick={confirmDelete} className="flex-1 px-6 py-3 bg-gray-900 text-white font-semibold rounded-2xl hover:bg-gray-800 transition-all duration-200">{t.income.delete}</button>
             </div>
           </div>
         </div>

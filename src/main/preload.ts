@@ -20,6 +20,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getCategories: () => ipcRenderer.invoke('db-get-categories'),
   addCategory: (category: any) => ipcRenderer.invoke('db-add-category', category),
   updateCategory: (category: any) => ipcRenderer.invoke('db-update-category', category),
+  deleteCategory: (id: string) => ipcRenderer.invoke('db-delete-category', id),
 
   // Resumen
   getSummary: () => ipcRenderer.invoke('db-get-summary'),
@@ -60,6 +61,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Historial Mensual
   getMonthlyHistory: () => ipcRenderer.invoke('getMonthlyHistory'),
   exportMonthlyPDF: (data: any) => ipcRenderer.invoke('exportMonthlyPDF', data),
+  backupDatabase: () => ipcRenderer.invoke('backupDatabase'),
+  restoreDatabase: () => ipcRenderer.invoke('restoreDatabase'),
 
   // Utilidades
   getDatabasePath: () => ipcRenderer.invoke('getDatabasePath'),
@@ -77,6 +80,7 @@ declare global {
       getCategories: () => Promise<any[]>;
       addCategory: (category: any) => Promise<any>;
       updateCategory: (category: any) => Promise<any>;
+      deleteCategory: (id: string) => Promise<void>;
       getSummary: () => Promise<any>;
       getBudgetAllocation: () => Promise<{ needs: number; wants: number; savings: number; methodTitle?: string }>;
       saveBudgetAllocation: (allocation: { needs: number; wants: number; savings: number; methodTitle?: string }) => Promise<void>;
@@ -104,8 +108,10 @@ declare global {
       // Historial Mensual
       getMonthlyHistory: () => Promise<any[]>;
       exportMonthlyPDF: (data: any) => Promise<{ success: boolean; path?: string }>;
+      backupDatabase: () => Promise<{ success: boolean; error?: string }>;
+      restoreDatabase: () => Promise<{ success: boolean; error?: string }>;
       getDatabasePath: () => Promise<string>;
       quitApp: () => Promise<void>;
     };
   }
-} 
+}

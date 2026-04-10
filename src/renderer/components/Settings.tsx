@@ -1,15 +1,7 @@
-/**
- * Copyright (c) 2026 FinBook
- * Owner: Diego Ledesma
- * 
- * This file is part of FinBook, a personal finance management application.
- * All rights reserved.
- */
-
 import React, { useState } from 'react';
-import { X, Settings as SettingsIcon } from 'lucide-react';
+import { X, Settings as SettingsIcon, Tags } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Language } from '../utils/i18n';
+import CategoriesModal from './CategoriesModal';
 
 interface SettingsProps {
   isOpen: boolean;
@@ -18,6 +10,41 @@ interface SettingsProps {
 
 const Settings: React.FC<SettingsProps> = ({ isOpen, onClose }) => {
   const { language, setLanguage, t } = useLanguage();
+  const [showCategoriesModal, setShowCategoriesModal] = useState(false);
+  const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
+
+  const handleBackup = async () => {
+    // ... (rest of backup logic follows)
+    // ... (rest of backup logic follows)
+    try {
+      const result = await window.electronAPI.backupDatabase();
+      if (result.success) {
+        setStatus({ type: 'success', message: t.settings.backupSuccess });
+      } else if (result.error) {
+        setStatus({ type: 'error', message: result.error });
+      }
+    } catch (error: any) {
+      setStatus({ type: 'error', message: error.message });
+    }
+  };
+
+  const handleRestore = async () => {
+    if (!window.confirm(t.settings.restoreWarning)) {
+      return;
+    }
+
+    try {
+      const result = await window.electronAPI.restoreDatabase();
+      if (result.success) {
+        // App will reload automatically from main process, but we can show success briefly
+        setStatus({ type: 'success', message: t.settings.restoreSuccess });
+      } else if (result.error) {
+        setStatus({ type: 'error', message: result.error });
+      }
+    } catch (error: any) {
+      setStatus({ type: 'error', message: error.message });
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -89,6 +116,54 @@ const Settings: React.FC<SettingsProps> = ({ isOpen, onClose }) => {
               </button>
             </div>
           </div>
+
+          <div className="pt-4 border-t border-gray-100">
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              {t.categories.title}
+            </label>
+            <div className="space-y-2">
+              <button
+                onClick={() => {
+                  setShowCategoriesModal(true);
+                }}
+                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 transition-all duration-200 text-left flex items-center justify-between group"
+              >
+                <div className="flex items-center space-x-3">
+                  <Tags className="w-5 h-5 text-gray-500 group-hover:text-gray-900 transition-colors" />
+                  <span className="font-medium text-gray-900">{t.categories.title}</span>
+                </div>
+                <div className="w-2 h-2 bg-gray-300 rounded-full group-hover:bg-gray-900 transition-colors"></div>
+              </button>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-gray-100">
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              {t.settings.dataManagement}
+            </label>
+            <div className="space-y-2">
+              <button
+                onClick={handleBackup}
+                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 transition-all duration-200 text-left"
+              >
+                <span className="font-medium text-gray-900">{t.settings.backup}</span>
+              </button>
+              <button
+                onClick={handleRestore}
+                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 transition-all duration-200 text-left"
+              >
+                <span className="font-medium text-gray-900">{t.settings.restore}</span>
+              </button>
+            </div>
+          </div>
+
+          {status && (
+            <div className={`p-3 rounded-xl text-sm font-medium ${
+              status.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+            }`}>
+              {status.message}
+            </div>
+          )}
         </div>
 
         <div className="flex space-x-3 pt-6 mt-6 border-t border-gray-200">
@@ -101,6 +176,12 @@ const Settings: React.FC<SettingsProps> = ({ isOpen, onClose }) => {
           </button>
         </div>
       </div>
+      
+      {/* Categories Modal - Opens over Settings */}
+      <CategoriesModal 
+        isOpen={showCategoriesModal} 
+        onClose={() => setShowCategoriesModal(false)} 
+      />
     </div>
   );
 };

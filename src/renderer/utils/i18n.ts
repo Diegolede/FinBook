@@ -425,6 +425,12 @@ export interface Translations {
     selectLanguage: string;
     spanish: string;
     english: string;
+    backup: string;
+    restore: string;
+    backupSuccess: string;
+    restoreSuccess: string;
+    restoreWarning: string;
+    dataManagement: string;
   };
 
   // Common
@@ -449,6 +455,8 @@ export interface Translations {
     numbersOnly: string;
     quickExpense: string;
     quickIncome: string;
+    confirmDelete: string;
+    deletePermanently: string;
     // Common categories
     electronics: string;
     clothing: string;
@@ -470,7 +478,7 @@ const translations: Record<Language, Translations> = {
       welcome: 'Bienvenido a FinBook',
       welcomeSubtitle: 'Vista general de tus ingresos, gastos y balance del mes actual',
       loading: 'Cargando información...',
-      version: 'FinBook v1.1.1',
+      version: 'FinBook v1.0.5',
     },
     menu: {
       home: 'Inicio',
@@ -859,6 +867,12 @@ const translations: Record<Language, Translations> = {
       selectLanguage: 'Seleccionar idioma',
       spanish: 'Español',
       english: 'Inglés',
+      backup: 'Guardar información (Copia de seguridad)',
+      restore: 'Cargar información (Restaurar datos)',
+      backupSuccess: 'Copia de seguridad creada con éxito',
+      restoreSuccess: 'Datos restaurados con éxito',
+      restoreWarning: 'Esta acción sobrescribirá todos tus datos actuales. ¿DESEAS CONTINUAR?',
+      dataManagement: 'Gestión de Datos',
     },
     common: {
       error: 'Error',
@@ -881,6 +895,8 @@ const translations: Record<Language, Translations> = {
       numbersOnly: '0.00 (solo números)',
       quickExpense: 'Gasto rápido',
       quickIncome: 'Ingreso rápido',
+      confirmDelete: 'Confirmar eliminación',
+      deletePermanently: '¿Estás seguro de que deseas eliminar este elemento permanentemente?',
       electronics: 'Electrónicos',
       clothing: 'Ropa',
       food: 'Alimentación',
@@ -899,7 +915,7 @@ const translations: Record<Language, Translations> = {
       welcome: 'Welcome to FinBook',
       welcomeSubtitle: 'Overview of your income, expenses and balance for the current month',
       loading: 'Loading information...',
-      version: 'FinBook v1.0.9',
+      version: 'FinBook v1.0.5',
     },
     menu: {
       home: 'Home',
@@ -1288,6 +1304,12 @@ const translations: Record<Language, Translations> = {
       selectLanguage: 'Select language',
       spanish: 'Spanish',
       english: 'English',
+      backup: 'Save information (Backup)',
+      restore: 'Load information (Restore data)',
+      backupSuccess: 'Backup created successfully',
+      restoreSuccess: 'Data restored successfully',
+      restoreWarning: 'This action will overwrite all your current data. DO YOU WANT TO CONTINUE?',
+      dataManagement: 'Data Management',
     },
     common: {
       error: 'Error',
@@ -1310,6 +1332,8 @@ const translations: Record<Language, Translations> = {
       numbersOnly: '0.00 (numbers only)',
       quickExpense: 'Quick expense',
       quickIncome: 'Quick income',
+      confirmDelete: 'Confirm Delete',
+      deletePermanently: 'Are you sure you want to permanently delete this item?',
       electronics: 'Electronics',
       clothing: 'Clothing',
       food: 'Food',
