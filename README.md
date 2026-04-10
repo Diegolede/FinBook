@@ -1,97 +1,144 @@
-# Finbook — Personal Finance with Precision
+<div align="center">
+  <img src="src/renderer/Finbook-logo.png" alt="Finbook Logo" width="180" />
+  <h1>Finbook</h1>
+  <p>
+    <strong>Tu gestor de finanzas personales definitivo.</strong>
+  </p>
 
-![Finbook Banner](https://raw.githubusercontent.com/diegoledesma/assets/main/finbook-banner.png) <!-- Note: Replace with actual banner URL -->
-
-**Finbook** is a premium, desktop-based personal finance management application designed for those who value both minimal aesthetics and powerful analytical capabilities. Built with a focus on simplicity, security, and data persistence.
-
-Developed and Owned by **Diego Ledesma**.
-
----
-
-## 🖤 The Monochromatic Aesthetic
-
-Finbook breaks away from the colorful, noisy interfaces of traditional finance apps. It features a strictly **monochromatic, premium visual design** that reduces cognitive load and allows you to focus purely on your numbers. 
-
-- **State-of-the-art UI**: Sleek dark/light transitions and pill-shaped interactive elements.
-- **Minimalist Reports**: High-contrast charts that highlight trends without the distraction of red/green indicators.
-
----
-
-## 🚀 Key Features
-
-### 📅 Intelligent Monthly Persistence
-Never lose track of your recurring obligations. Finbook automatically rolls over **Fixed Expenses** and **Fixed Income** to each new month, while providing a "Fresh Start" for one-time transactions.
-- **Smart Logic**: Non-recurring items stay in their respective months to maintain history accuracy.
-- **Manual Control**: Credit card installments are handled with a "Control-First" approach, giving the user full manual power over their tracking.
-
-### 📊 Advanced Financial Tracking
-- **Unified Dashboard**: A high-level overview of your monthly performance, goal progress, and recent activity.
-- **Custom Categorization**: Create and manage personal categories (e.g., employee names, specific projects) to tailor the app to your specific lifecycle.
-- **Savings Goals**: Milestone-based tracking for your long-term financial objectives.
-- **Integrated Checklist**: Keep track of financial tasks or shopping lists directly within the platform.
-
-### 🔒 Privacy & Security (Local-First)
-- **Zero Cloud**: Your financial data never leaves your machine. 
-- **SQLite Powered**: A robust local database ensures your records are permanent, searchable, and secure.
+  <!-- Badges -->
+  <p>
+    <img src="https://img.shields.io/badge/Hecho%20con-Arch%20Linux-1793d1?style=for-the-badge&logo=archlinux&logoColor=white" alt="Arch Linux" />
+    <img src="https://img.shields.io/badge/Editor-VS%20Code-007ACC?style=for-the-badge&logo=visualstudiocode&logoColor=white" alt="VS Code" />
+    <img src="https://img.shields.io/badge/IA-Gemini-8E75B2?style=for-the-badge&logo=googlebard&logoColor=white" alt="Gemini" />
+  </p>
+  <p>
+    <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
+    <img src="https://img.shields.io/badge/🇦🇷-Argentina-74ACDF?style=for-the-badge" alt="Argentina" />
+    <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite" />
+    <img src="https://img.shields.io/badge/Electron-47848F?style=for-the-badge&logo=electron&logoColor=white" alt="Electron" />
+    <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
+    <img src="https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite" />
+  </p>
+</div>
 
 ---
 
-## 🛠️ Technological Stack
+## Descripción General
 
-- **Framework**: Electron (Desktop Integration)
-- **Frontend**: React.js + TypeScript
-- **Styling**: Vanilla CSS (Tailwind CSS for utility)
-- **Database**: SQLite3
-- **Build Tool**: Vite
+**Finbook** es una aplicación de escritorio diseñada para simplificar la gestión de tus finanzas personales. Ofrece un control exhaustivo de ingresos, gastos y metas mensuales, todo bajo una interfaz moderna, rápida y centrada en la privacidad del usuario.
 
----
+<br>
+<div align="center">
+  <img src="src/renderer/captura.gif" alt="Captura de pantalla de Finbook" width="1000" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+  <p><em>Organiza tus finanzas con claridad y estilo</em></p>
+</div>
+<br>
 
-## 📋 Getting Started
+## Funcionalidades
 
-### Prerequisites
-- Node.js (v18 or superior)
-- npm
-
-### Installation
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/[your-username]/finbook.git
-   cd finbook
-   ```
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-3. **Run in development**:
-   ```bash
-   npm run dev
-   ```
+*   **Gestión Integral de Ingresos y Gastos**: Registra tus movimientos financieros de forma categorizada y detallada.
+*   **Seguimiento de Metas Mensuales**: Establece objetivos de ahorro y límites de gasto que se mantienen y actualizan mes a mes.
+*   **Inteligencia de Persistencia Mensual**: Los gastos e ingresos fijos se arrastran automáticamente, mientras que los puntuales se reinician cada mes para un "Fresh Start".
+*   **Estética Monocromática Premium**: Interfaz limpia, minimalista y de alta gama para evitar distracciones.
+*   **Control de Tarjetas de Crédito**: Administra tus consumos, cuotas y fechas de vencimiento de manera eficiente y manual.
+*   **Dashboard Visual e Interactivo**: Visualiza el estado actual de tus finanzas con gráficos y resúmenes automáticos por mes.
+*   **Notas y Checklist Integrado**: Mantén tus recordatorios financieros organizados directamente en tu espacio de trabajo.
+*   **Persistencia Local y Privacidad**: Todos tus datos se almacenan localmente mediante SQLite, sin necesidad de conexión a la nube.
+*   **Multilenguaje**: Soporte completo para Español e Inglés.
 
 ---
 
-## 🏗️ Distribution
+## Tecnologías y Dependencias
 
-To package the application for your operating system:
+### Stack Tecnológico
+Finbook está construido con tecnologías modernas para garantizar estabilidad y rendimiento:
+*   **Core**: [Electron](https://www.electronjs.org/) (Aplicación de escritorio)
+*   **Frontend**: [React](https://reactjs.org/) + [TypeScript](https://www.typescriptlang.org/)
+*   **Estilos**: [Tailwind CSS](https://tailwindcss.com/)
+*   **Base de Datos**: [SQLite](https://www.sqlite.org/) (Persistencia local)
+*   **Gráficos**: [Chart.js](https://www.chartjs.org/) + [Lucide React](https://lucide.dev/)
+
+---
+
+## Requisitos del Sistema (Linux)
+
+Finbook se distribuye como un archivo **AppImage** autocontenido. En la mayoría de los entornos de escritorio modernos, la aplicación funcionará de inmediato.
+
+La única dependencia del sistema que comúnmente requiere instalación manual en distribuciones recientes (como Ubuntu 22.04+ o Fedora 38+) es la biblioteca **FUSE (Filesystem in Userspace)** en su versión 2, necesaria para montar el archivo AppImage.
+
+### Guía de Instalación de FUSE
+
+<details>
+<summary><strong>Arch Linux / Manjaro</strong></summary>
 
 ```bash
-# Windows
-npm run dist:win
-
-# Linux
-npm run dist:linux
+sudo pacman -S fuse2
 ```
+</details>
+
+<details>
+<summary><strong>Fedora / CentOS / RHEL</strong></summary>
+
+```bash
+sudo dnf install fuse
+```
+</details>
+
+<details>
+<summary><strong>Ubuntu 24.04 / Debian 13 (Trixie) y superiores</strong></summary>
+
+En versiones muy recientes, el paquete ha sido renombrado para gestionar la transición de 64 bits:
+```bash
+sudo apt update
+sudo apt install libfuse2t64
+```
+</details>
+
+<details>
+<summary><strong>Ubuntu 20.04 - 23.10 / Debian 11 - 12</strong></summary>
+
+Para versiones estándar recientes:
+```bash
+sudo apt update
+sudo apt install libfuse2
+```
+</details>
+
+*Nota: El resto de las bibliotecas gráficas (GTK, ALSA, X11) suelen estar preinstaladas en cualquier distribución orientada al escritorio.*
 
 ---
 
-## 🤝 Contributing & License
+## Descarga e Instalación
+
+Para utilizar Finbook en su sistema:
+
+1.  Diríjase a la sección **[Releases](../../releases)** del repositorio.
+2.  Descargue la última versión del archivo `.AppImage` (ej. `Finbook-1.0.0.AppImage`).
+3.  Otorgue permisos de ejecución al archivo mediante la terminal:
+
+    ```bash
+    chmod +x Finbook-*.AppImage
+    ```
+
+4.  Ejecute la aplicación:
+
+    ```bash
+    ./Finbook-*.AppImage
+    ```
+
+---
+
+## Contribución y Licencia
 
 ### Source Available License
-Finbook is a **Source Available** project. All intellectual property rights belong solely to **Diego Ledesma**.
-- **Personal Use**: You are free to use and modify the code for personal use.
-- **Redistribution**: Prohibited. You may not redistribution clones or derivative versions of Finbook.
-- **Contributions**: Pull Requests are welcome! By contributing, you agree that Diego Ledesma retains ownership of the merged code.
+Finbook es un proyecto de **Código Reperible (Source Available)**. Todos los derechos de propiedad intelectual pertenecen exclusivamente a **Diego Ledesma**.
+
+*   **Uso Personal**: Eres libre de usar y modificar el código para uso personal.
+*   **Redistribución**: Prohibida. No se permite redistribuir clones o versiones derivadas de Finbook.
+*   **Contribuciones**: ¡Los Pull Requests son bienvenidos! Al contribuir, aceptas que Diego Ledesma retiene la propiedad del código fusionado.
 
 ---
 
-Created with ❤️ by **Diego Ledesma**.
-💰 *Manage your finances with the elegance they deserve.*
+<div align="center">
+  <p>Desarrollado y Diseñado por <strong>Diego Ledesma</strong>, Dueño de Finbook</p>
+</div>
